@@ -1,5 +1,5 @@
-# RADseq_pipeline
-Linux scripts for a RADseq analysis pipeline
+# RADseq Pipeline
+Linux and R scripts for a RADseq analysis pipeline
 
 ## Downloading data: FTP method via Linux
 

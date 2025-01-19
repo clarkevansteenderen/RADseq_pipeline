@@ -1,0 +1,106 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub stacks_populations_refgenome.job
+############################################################################################
+
+# Change walltime to 48:00:00 if bootstrapping is done
+
+#PBS -l select=10:ncpus=24:mpiprocs=24
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=5:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_refgenome/refgenomepops_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_refgenome/refgenomepops_stderr.txt
+#PBS -N stacks_populations_refgenome
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+module add chpc/BIOMODULES
+module add stacks
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+cd "$BASE_DIR"
+
+# get the output file populations.sumstats.tsv from the first ref_map.pl run, and extract 1000 random loci from it
+# Note: this sumstats file is written after the first time ref_map.pl is run. You can use it to create the whitelist, but it isn't important thereafter,
+# since every time the populations program is run, it will create a sumstats file for that run 
+# 1000 loci is a manageable amount of data for STRUCTURE. Not sure whether STRUCTURE is that useful if it is limited by the amount of data it can handle?
+# the output file is whitelist.tsv 
+
+#grep -v "^#" ./stacksoutput_refgenome/populations.sumstats.tsv | cut -f 1 | sort | uniq | shuf -n 1000 | sort -n > ./stacksoutput_refgenome/whitelist.tsv
+
+##############################################################
+# Run populations 
+##############################################################
+
+##############################################
+# RUN USING BROAD GROUPINGS FOR LOCALITY
+##############################################
+
+mkdir -p ./stacksoutput_refgenome/populations/broadgroups/structure
+mkdir -p ./stacksoutput_refgenome/populations/broadgroups/otherformats
+
+###########################################################################
+# run populations to create output in the right format for use in STRUCTURE
+###########################################################################
+# with a whitelist 
+#populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/broadgroups/structure --popmap ./barcodes/bothplates_pops.txt -r 0.75 -f p_value -t 12 --hwe --fstats --structure --write-single-snp --ordered-export -W ./stacksoutput_refgenome/whitelist.tsv
+
+# without the whitelist 
+populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/broadgroups/structure --popmap ./barcodes/bothplates_pops.txt -r 0.75 -f p_value -t 12 --hwe --fstats --structure --write-single-snp --ordered-export
+
+###########################################################################
+# run populations to create output in the right format for use in other formats 
+###########################################################################
+
+#################
+# bootstrapping
+#################
+# add --bootstrap-archive to make bootstrapping possible in the next run of populations
+#populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/broadgroups/otherformats --popmap ./barcodes/bothplates_pops.txt -r 0.75 -f p_value -t 12 --bootstrap-archive
+
+# now bootstrap repeat, just for Fst values
+#populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/broadgroups/otherformats --popmap ./barcodes/bothplates_pops.txt -r 0.75 -f p_value -t 12 --hwe --fstats --phylip-var --plink --phylip --vcf --vcf-all --bootstrap-fst --bootstrap-reps 1000
+
+#################
+# No bootstrapping 
+#################
+
+populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/broadgroups/otherformats --popmap ./barcodes/bothplates_pops.txt -r 0.75 -f p_value -t 12 --hwe --fstats --phylip-var --plink --phylip --vcf --vcf-all
+
+
+#############################################################
+# RUN USING GROUPS SUBDIVIDED INTO DIFFERENT SOUTH AFRICAN LOCATIONS
+#############################################################
+# Be sure to update this file to make sure that sample names are removed if they have been deleted from the analysis
+
+mkdir -p ./stacksoutput_refgenome/populations/SAspecific/structure
+mkdir -p ./stacksoutput_refgenome/populations/SAspecific/otherformats
+
+# run populations to create output in the right format for use in STRUCTURE
+
+# with the whitelist 
+#populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/SAspecific/structure --popmap ./barcodes/bothplates_pops_SA.txt -r 0.75 -f p_value -t 12 --hwe --fstats --structure --write-single-snp --ordered-export -W ./stacksoutput_refgenome/whitelist.tsv
+
+# without the whitelist
+populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/SAspecific/structure --popmap ./barcodes/bothplates_pops_SA.txt -r 0.75 -f p_value -t 12 --hwe --fstats --structure --write-single-snp --ordered-export
+
+#################
+# bootstrapping
+#################
+
+# run populations again to create other output formats, without the whitelist option (i.e. run on all the loci)
+#populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/SAspecific/otherformats --popmap ./barcodes/bothplates_pops_SA.txt -r 0.75 -f p_value -t 12 --bootstrap-archive
+
+# now bootstrap repeat, just for Fst values
+#populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/SAspecific/otherformats --popmap ./barcodes/bothplates_pops_SA.txt -r 0.75 -f p_value -t 12 --hwe --fstats --phylip-var --plink --phylip --vcf --vcf-all --bootstrap-fst --bootstrap-reps 1000
+
+#################
+# No bootstrapping
+#################
+
+populations -P ./stacksoutput_refgenome/ -O ./stacksoutput_refgenome/populations/SAspecific/otherformats --popmap ./barcodes/bothplates_pops_SA.txt -r 0.75 -f p_value -t 12 --hwe --fstats --phylip-var --plink --phylip --vcf --vcf-all

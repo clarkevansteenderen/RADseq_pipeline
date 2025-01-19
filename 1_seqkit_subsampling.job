@@ -1,0 +1,71 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub subsample.job
+############################################################################################
+
+#PBS -l select=2:ncpus=24:mpiprocs=24:mem=120gb
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=5:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/seqkitstdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/seqkitstderr.txt
+#PBS -N seqkit_subsampling
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+module add chpc/BIOMODULES
+module add seqkit
+
+# Change the path here accordingly
+cd /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata
+
+##############################################################
+
+# Set the number of reads and seed for subsampling
+NUM_PLATES=1
+NUM_READS=0.01
+SEED=100
+
+##############################################################
+
+# Create the output directory if it doesn't exist
+mkdir -p subsamples
+
+##############################################################
+
+# Loop over the plates (1 or more plates)
+# Make sure that you have named the folders "plate_x", with the appropriate number
+for plate in $(seq 1 "$NUM_PLATES"); do
+    PLATE_DIR="plate_$plate"
+    
+    # Check if the plate directory exists
+    if [ -d "$PLATE_DIR" ]; then
+        echo "Processing $PLATE_DIR..."
+
+        # Find all read 1 fastq.gz files in the plate directory
+        for forward in "$PLATE_DIR"/*_R1_*.fastq.gz; do
+            # Get the corresponding read 2 file by replacing R1 with R2
+            reverse=$(echo "$forward" | sed 's/_R1_/_R2_/')
+
+            # Extract the base sample name without R1/R2 and the final number
+            base_name=$(basename "$forward" | sed -E 's/(.*)_R[12]_([0-9]+)\.fastq\.gz/\1/')
+            sample_number=$(basename "$forward" | sed -E 's/.*_R[12]_([0-9]+)\.fastq\.gz/\1/')
+
+            # Subsample read 1 and place R1 before the number
+            seqkit sample -2 -p $NUM_READS -s $SEED "$forward" -o subsamples/subsampled_"$base_name"_R1_"$sample_number".fastq.gz
+
+            # Subsample corresponding read 2 and place R2 before the number
+            seqkit sample -2 -p $NUM_READS -s $SEED "$reverse" -o subsamples/subsampled_"$base_name"_R2_"$sample_number".fastq.gz
+
+            echo "Subsampled $base_name, sample number $sample_number"
+        done
+    else
+        echo "Warning: Directory $PLATE_DIR does not exist. Skipping..."
+    fi
+done
+
+##############################################################

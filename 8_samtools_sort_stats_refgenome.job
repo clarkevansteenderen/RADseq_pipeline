@@ -1,0 +1,63 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub samtools_sort_stats.job
+############################################################################################
+
+#PBS -l select=2:ncpus=24:mpiprocs=24
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=10:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/alignment_sorted/samtools_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/alignment_sorted/samtools_stderr.txt
+#PBS -N samtools_sort_stats
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+module add chpc/BIOMODULES
+module add samtools
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+cd "$BASE_DIR"
+
+# Directory containing your unsorted BAM files
+input_dir="./ref_genome/alignment"
+
+# Directory where you want to save the sorted BAM files
+# these sorted BAM files will serve as the input for Stacks ref_map.pl function for assembling reads based on a ref genome
+output_dir="./ref_genome/alignment_sorted"
+
+# Create the output directory if it doesn't exist
+mkdir -p "$output_dir"
+
+# Loop through each BAM file in the input directory
+
+for bam_file in "$input_dir"/*.bam; do
+
+    # Extract the base name of the BAM file (without the directory and extension)
+    base_name=$(basename "$bam_file" .bam)
+
+    # Define the output sorted BAM file path
+    sorted_bam="$output_dir/${base_name}.bam"
+
+    # Sort the BAM file
+    samtools sort "$bam_file" -o "$sorted_bam"
+
+    # Get output stats for the sorted BAM file
+    samtools flagstat "$sorted_bam" > "${sorted_bam%.bam}_flagstat.txt"
+
+    # Print a message indicating the process is complete for this file
+    echo "Processed $bam_file: sorted and stats generated."
+	
+done
+
+# create a folder that contains the BAM files only
+
+cd ./ref_genome/alignment_sorted
+
+mkdir bam_files
+
+mv *.bam ./bam_files

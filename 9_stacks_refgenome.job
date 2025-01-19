@@ -1,0 +1,97 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub stacks_refgenome.job
+############################################################################################
+
+#PBS -l select=10:ncpus=24:mpiprocs=24
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=48:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_refgenome/stacksrefgenome_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_refgenome/stacksrefgenome_stderr.txt
+#PBS -N stacks_refgenome
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+module add chpc/BIOMODULES
+module add stacks
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+cd "$BASE_DIR"
+
+############################################################################################################################
+# specify samples to exclude. These are put in a temporary folder, Stacks will run on the remaining samples, and then they will be put back into the
+# folder when Stacks is done
+############################################################################################################################
+
+bam_folder="./ref_genome/alignment_sorted/bam_files"
+# Create a temporary directory in the specified folder
+temp_folder=$(mktemp -d "$bam_folder/tempdir.XXXXXX")
+
+# List of samples to exclude
+# Read the file list from the text file
+# make sure there's a newline after the last sample name, otherwise it gets excluded
+file_list="$bam_folder/samples_to_exclude.txt"
+
+# Loop through each file name in the text file and move the samples to exclude into the temporary folder 
+while IFS= read -r file; do
+    # Check if the file exists in the bam folder
+    if [ -f "$bam_folder/$file.bam" ]; then
+        # Move the file to the temporary folder
+        mv "$bam_folder/$file.bam" "$temp_folder/"
+        echo "Moved $file.bam to $temp_folder"
+    else
+        echo "File $file.bam not found in $bam_folder"
+    fi
+done < "$file_list"
+
+###########################################################################################################################
+
+# make the output folder to get ready for running the next step: ref_map.pl
+mkdir -p stacksoutput_refgenome
+
+##################################################################################################
+# This bit makes sure that the samples read in match the sample names in the popmap file 
+##################################################################################################
+# get a list of all the BAM files that are ready to go
+# You might have manually deleted some of these based on the output, and now need to re-run the analysis without them
+# the m-maxdepth argument makes sure that it only searches within the bam_files folder, and not recursively through subdirectories as well
+find ./ref_genome/alignment_sorted/bam_files -maxdepth 1 -type f -name '*.bam' | sed 's|.*/||; s/\.bam$//' | sort -u > ./ref_genome/alignment_sorted/samplenames.txt
+
+# Make sure that the pops_all.txt file is sorted (contains ALL samples for the project, before removal of some)
+
+sort "$BASE_DIR/barcodes/pops_all.txt" -o "$BASE_DIR/barcodes/pops_all.txt"
+#sort "$BASE_DIR/barcodes/pops_all_sa.txt" -o /mnt/lustre/users/cvansteenderen/RADseq/IcePlant.RawData/Ice_L1/barcodes/pops_all_sa.txt
+ 
+# now join the population group names in pops_all.txt to the sample names in samplenames.txt
+# write the results to bothplates_pops.txt in the barcodes/ folder (this can overwrite to ensure that it is updated)
+# -t $'\t' ensures a tab space between the sample name and population name assigned
+
+join -t $'\t' "$BASE_DIR/barcodes/pops_all.txt" "$BASE_DIR/ref_genome/alignment_sorted/samplenames.txt" > "$BASE_DIR/barcodes/bothplates_pops.txt"
+#join -t $'\t' /mnt/lustre/users/cvansteenderen/RADseq/IcePlant.RawData/Ice_L1/barcodes/pops_all_sa.txt /mnt/lustre/users/cvansteenderen/RADseq/IcePlant.RawData/Ice_L1/ref_genome/alignment_sorted/samplenames.txt > /mnt/lustre/users/cvansteenderen/RADseq/IcePlant.RawData/Ice_L1/barcodes/bothplates_pops_SA.txt
+
+##################################################################################################
+
+##################################################################
+##################################################################
+# Now run Stacks refmap
+##################################################################
+##################################################################
+ref_map.pl -o ./stacksoutput_refgenome --popmap ./barcodes/bothplates_pops.txt --samples ./ref_genome/alignment_sorted/bam_files -X "populations:--fstats"
+
+##################################################################################################
+
+# Move the samples that were excluded (in the temp folder) back to the original folder
+for file in $(cat "$file_list"); do
+    if [ -f "$temp_folder/$file.bam" ]; then
+        mv "$temp_folder/$file.bam" "$bam_folder/"
+        echo "Moved $file.bam back to $bam_folder"
+    fi
+done
+
+# Clean up the temporary folder (if empty)
+rmdir "$temp_folder"

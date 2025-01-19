@@ -1,0 +1,67 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub bowtie_aligning.job
+############################################################################################
+
+#PBS -l select=10:ncpus=24:mpiprocs=24:mem=120gb
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=48:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/refgen_align_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/refgen_align_stderr.txt
+#PBS -N bowtie2_aligning
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+module add chpc/BIOMODULES
+module add bowtie2
+module add samtools
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+cd "$BASE_DIR/stacksoutput/combined_plates/ready"
+
+##############################################################
+# align fragments to the reference genome
+##############################################################
+
+# specifying paths to -1 and -2 means we're dealing with paired end reads
+
+# Define the reference index made by running bowtie2-build previously
+
+REFERENCE_INDEX="$BASE_DIR/ref_genome/ncbi_dataset/data/GCA_030267885.1/reference_index"
+output_dir="$BASE_DIR/ref_genome/alignment"
+
+##############################################################
+# Loop through all forward read files in the /combined_plates/ready directory
+##############################################################
+
+for forward in *.1.fq.gz; do
+    # Define the reverse read file based on the forward read file name
+    reverse="${forward/.1.fq.gz/.2.fq.gz}"
+
+    # Extract the sample name (everything before the last .1 or .2)
+    sample_name=$(basename "$forward" | sed -E 's/(.*)\.[12]\.fq\.gz/\1/')
+
+    # Define output BAM file name
+    output_bam="${output_dir}/${sample_name}.bam"
+
+    # Run Bowtie2 alignment and pipe the output to Samtools to convert to a BAM file format (more space efficient)
+    bowtie2 -x "$REFERENCE_INDEX" -1 "$forward" -2 "$reverse" | \
+    samtools view -bS -o "$output_bam" -
+done
+
+# get a list of all the sample names (i.e. bam files)
+find -type f -name '*.bam' | xargs -n 1 basename | sed 's/\.bam$//' | sort -u > samplenames.txt
+
+# write out the alignment rate success per sample 
+grep "overall alignment rate" refgen_align_stderr.txt | awk '{gsub("%", "", $1); print $1}' > alignment_rates.txt
+
+paste samplenames2.txt alignment_rates.txt > refgenome_alignment_stats.txt
+
+
+
+#bowtie2 -x "$REFERENCE_INDEX" -1 "SA7.8.1.fq.gz" -2 "SA7.8.2.fq.gz" | samtools view -bS -o "/mnt/lustre/users/cvansteenderen/RADseq/IcePlant.RawData/Ice_L1/ref_genome/alignment/SA7.8.bam"

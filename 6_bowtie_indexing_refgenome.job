@@ -1,0 +1,33 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub bowtie_indexing.job
+############################################################################################
+
+#PBS -l select=2:ncpus=24:mpiprocs=24:mem=120gb
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=12:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/indexing_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/indexing_stderr.txt
+#PBS -N bowtie2_indexing
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+module add chpc/BIOMODULES
+module add bowtie2
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+cd "$BASE_DIR/ref_genome/ncbi_dataset/data/GCA_030267885.1"
+
+##############################################################
+# assign indexes to the reference genome scaffolds
+##############################################################
+
+bowtie2-build --threads 4 GCA_030267885.1_Mcrystallinum_1.0_genomic.fna reference_index
+
+# Make a new directory into which the alignment can be written in the next script
+mkdir "$BASE_DIR/ref_genome/alignment"

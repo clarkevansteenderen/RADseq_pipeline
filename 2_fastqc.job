@@ -1,0 +1,40 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub fastqc.job
+############################################################################################
+
+#PBS -l select=2:ncpus=24:mpiprocs=24:mem=120gb
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=5:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/fastqc_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/fastqc_stderr.txt
+#PBS -N fastqc
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+module add chpc/BIOMODULES
+module add fastqc
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+
+# Default to 1 plate if NUM_PLATES is not set
+NUM_PLATES=1
+
+# Loop over the plates
+for i in $(seq 1 "$NUM_PLATES"); do
+    PLATE_DIR="$BASE_DIR/plate_$i"
+
+    # Check if the directory exists before processing
+    if [ -d "$PLATE_DIR" ]; then
+        echo "Processing $PLATE_DIR..."
+        cd "$PLATE_DIR" || { echo "Error: Could not change to $PLATE_DIR"; exit 1; }
+        fastqc -o "$PLATE_DIR" *.fastq.gz
+    else
+        echo "Warning: Directory $PLATE_DIR does not exist. Skipping..."
+    fi
+done

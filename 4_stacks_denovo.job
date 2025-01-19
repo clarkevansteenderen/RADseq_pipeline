@@ -1,0 +1,123 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub stacks_denovo.job
+############################################################################################
+
+#PBS -l select=10:ncpus=24:mpiprocs=24
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=48:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_denovo/denovo_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_denovo/denovo_stderr.txt
+#PBS -N stacks_denovo
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+module add chpc/BIOMODULES
+module add stacks
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+# Do you have a list of samples you want to exclude from the analysis? If yes, change this to 1.
+EXCLUDE_SAMPLE_LIST=0
+
+cd "$BASE_DIR"
+
+if [ "$EXCLUDE_SAMPLE_LIST" -eq 1 ]; then
+############################################################################################################################
+# specify samples to exclude. These are put in a temporary folder, Stacks will run on the remaining samples, and then they will be put back into the
+# folder when Stacks is done
+############################################################################################################################
+
+ready_folder="./stacksoutput/combined_plates/ready"
+# Create a temporary directory in the specified folder
+temp_folder=$(mktemp -d "$ready_folder/tempdir.XXXXXX")
+
+# List of samples to exclude
+# Read the file list from the text file
+# make sure there's a newline after the last sample name, otherwise it gets excluded
+file_list="$ready_folder/samples_to_exclude.txt"
+
+# Loop through each file name in the text file and move the samples to exclude into the temporary folder 
+while IFS= read -r sample; do
+    # Find and move both forward (.1) and reverse (.2) reads for each sample
+    for file in "$ready_folder/$sample".*; do
+        # Check if the file exists
+        if [ -f "$file" ]; then
+            # Move the file to the temporary folder
+            mv "$file" "$temp_folder/"
+            echo "Moved $(basename "$file") to $temp_folder"
+        else
+            echo "File $file not found in $ready_folder"
+        fi
+    done
+done < "$file_list"
+
+echo "Exclusion process completed. Samples moved to $temp_folder."
+else
+    echo "EXCLUDE_SAMPLE_LIST is set to 0. Skipping sample exclusion step."
+fi
+
+############################################################################################################################################
+# Since some samples were removed (small file size, quality etc.), we need to create an updated list of samples with population information
+
+# extract the sample names from the “ready” folder, so that you can create a population file with each sample name, and the population it comes from. 
+# Here, we’re keeping the sample names, excluding the last .1 or .2 from the name, and then deleting the resulting duplicate names. E.g. there will be CI11.1.1.1 and
+# CI11.1.1.2 for read 1 and read 2. After deleting the .1 and .2, we’ll have two CI11.1.1 names → that’s why we delete duplicates
+
+find ./stacksoutput/combined_plates/ready -type f -maxdepth 1 -name '*.fq.gz' | sed 's|.*/||; s/\.fq\.gz$//' | sed 's/\.[0-9]*$//' | sort -u > stacksoutput/combined_plates/samplenames.txt
+
+# Now sort through the file with population assignments for all samples (pops_all.txt), and allocate the correct population group to the right samples
+
+# first sort the pops_all.txt file
+sort "$BASE_DIR/barcodes/pops_all.txt" -o "$BASE_DIR/barcodes/pops_all.txt"
+
+# now join the population group names in pops_all.txt to the sample names in samplenames.txt
+# write the results to bothplates_pops.txt in the barcodes/ folder
+# -t $'\t' ensures a tab space between the sample name and population name assigned
+join -t $'\t' "$BASE_DIR/barcodes/pops_all.txt" "$BASE_DIR/stacksoutput/combined_plates/samplenames.txt" > "$BASE_DIR/barcodes/bothplates_pops.txt"
+
+##############################################################
+
+# make a folder for the denovo outputs
+mkdir -p ./stacksoutput_denovo
+
+##############################################################
+# Run Stacks with these settings
+##############################################################
+
+# -m 3 = the minimum number of identical raw reads required to create a stack
+# -n 4 = number of mismatches allowed between stacks between individuals
+# -M 3 = number of mismatches allowed between stacks within individuals
+# -T 8 = number of threads
+# --rm-pcr-duplicates = remove all but one set of read pairs of the same sample that have the same insert length
+# --paired = after assembling RAD loci, assemble contigs for each locus from paired-end reads
+# --min-samples-per-pop 0.75 = minimum percentage of individuals in a population required to process a locus for that population
+# --min-populations 2 = minimum number of populations a locus must be present in to process a locus. We have a total of 8 population groups in this data
+# -X "populations:--fstats" enable SNP and haplotype-based F statistics
+
+##############################################################
+# assemble reads 
+##############################################################
+
+denovo_map.pl -m 3 -n 4 -M 3 -T 8 -o ./stacksoutput_denovo --popmap ./barcodes/bothplates_pops.txt --samples ./stacksoutput/combined_plates/ready --rm-pcr-duplicates --paired --min-samples-per-pop 0.75 --min-populations 2 -X "populations:--fstats"
+
+##############################################################
+
+if [ "$EXCLUDE_SAMPLE_LIST" -eq 1 ]; then
+
+# Move the excluded files back to the original folder
+for file in "$temp_folder"/*; do
+    if [ -f "$file" ]; then
+        mv "$file" "$ready_folder/"
+        echo "Moved $(basename "$file") back to $ready_folder"
+    fi
+done
+
+# Clean up the temporary folder (if empty)
+rmdir "$temp_folder"
+
+fi 

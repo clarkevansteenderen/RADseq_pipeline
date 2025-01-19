@@ -18,8 +18,8 @@ your_repository/
 │   │   └── filenameA_R1_001.fastq    
 │   │   └── filenameA_R2_001.fastq   
 │   ├── plate_2/    
-│   │   └── filenameB_R1_001.fastq    
-│   │   └── filenameB_R2_001.fastq    
+│   │   └── filenameB_R1_002.fastq    
+│   │   └── filenameB_R2_002.fastq    
 
 :bulb: **NB: each plate folder has to be named plate_1, plate_2, up to plate_n**
 

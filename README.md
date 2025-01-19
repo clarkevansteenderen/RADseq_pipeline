@@ -21,6 +21,8 @@ your_repository/
 │   │   └── filenameB_R1_001.fastq    
 │   │   └── filenameB_R2_001.fastq    
 
+:bulb: **NB: each plate folder has to be named plate_1, plate_2, up to plate_n**
+
 ## Viewing data - quick overview
 
 **Read 1:**

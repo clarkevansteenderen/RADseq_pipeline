@@ -8,7 +8,7 @@
 #PBS -l select=2:ncpus=24:mpiprocs=24:mem=120gb
 #PBS -P CBBI1682
 #PBS -q normal
-#PBS -l walltime=5:00:00
+#PBS -l walltime=2:00:00
 #PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/fastqc_stdout.txt
 #PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/fastqc_stderr.txt
 #PBS -N fastqc
@@ -22,7 +22,7 @@ module add fastqc
 
 BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
 
-# Default to 1 plate if NUM_PLATES is not set
+# Default to 1 plate if NUM_PLATES is not set here
 NUM_PLATES=1
 
 # Loop over the plates

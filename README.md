@@ -1,6 +1,9 @@
 # RADseq Pipeline
-Linux and R scripts for a RADseq analysis pipeline
+## 🧬 **Linux and R scripts for a RADseq analysis pipeline**
 
+Contact Clarke van Steenderen at vsteenderen@gmail.com or clarke.vansteenderen@ru.ac.za for queries
+<br><br> 
+                        
 ## Downloading data: FTP method via Linux
 
 ``` 

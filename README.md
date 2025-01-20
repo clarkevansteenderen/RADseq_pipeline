@@ -6,6 +6,8 @@ Contact Clarke van Steenderen at vsteenderen@gmail.com or clarke.vansteenderen@r
                         
 ## Downloading data: FTP method via Linux
 
+To access data via the FTP approach, ssh into a DTN (data transfer node) on the HPC. Using ``nohup`` and ``--continue`` ensures that the connection is not interrupted during the downloading process.
+
 ``` 
 ssh cvansteenderen@DTN.chpc.ac.za
 password_here
@@ -58,6 +60,29 @@ I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII-I-IIIIIIIIIIIIIIIIIIIIIIIIII9IIIIIII
 @LH00504:37:22MMNWLT3:2:1101:48164:1016 2:N:0:ACGTTACC+TTGTCGGT
 GNTCGTTGTAATTCAATGATCTCAAGTTATGTGCACAAATTGGAAACAACGACTTAGCCTTGTGTTCTTGCCATTTTGACACCTGTTCGATGTTTCGGCTATAACTTCTTCGTTTGAGCTCTAAATGAGGCAGTTCAAGAGGCNGTGNAA
 
-# 
+# 🗒️ Scripts
 
+## Subsampling
+
+## FASTQC
+
+## Demultiplexing
+
+# 🔵 DENOVO (no reference genome)
+
+## 🔵 Assembly: denovo
+
+## 🔵 Additional population assignment/s
+
+# 🟡 REFERNCE GENOME
+
+## 🟡 Preparing a reference genome (if available!)
+
+## 🟡 Assembly: reference genome
+
+## 🟡 Additional population assignments
+
+# DOWNSTREAM
+
+## fastSTRUCTURE
 

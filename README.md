@@ -74,7 +74,7 @@ GNTCGTTGTAATTCAATGATCTCAAGTTATGTGCACAAATTGGAAACAACGACTTAGCCTTGTGTTCTTGCCATTTTGAC
 
 ### 🔵 Additional population assignment/s
 
-## 🟡 REFERNCE GENOME
+## 🟡 REFERENCE GENOME
 
 ### 🟡 Preparing a reference genome (if available!)
 

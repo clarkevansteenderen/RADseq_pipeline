@@ -68,21 +68,21 @@ GNTCGTTGTAATTCAATGATCTCAAGTTATGTGCACAAATTGGAAACAACGACTTAGCCTTGTGTTCTTGCCATTTTGAC
 
 ## Demultiplexing
 
-# 🔵 DENOVO (no reference genome)
+## 🔵 DENOVO (no reference genome)
 
-## 🔵 Assembly: denovo
+### 🔵 Assembly: denovo
 
-## 🔵 Additional population assignment/s
+### 🔵 Additional population assignment/s
 
-# 🟡 REFERNCE GENOME
+## 🟡 REFERNCE GENOME
 
-## 🟡 Preparing a reference genome (if available!)
+### 🟡 Preparing a reference genome (if available!)
 
-## 🟡 Assembly: reference genome
+### 🟡 Assembly: reference genome
 
-## 🟡 Additional population assignments
+### 🟡 Additional population assignments
 
-# DOWNSTREAM
+## DOWNSTREAM
 
-## fastSTRUCTURE
+### fastSTRUCTURE
 

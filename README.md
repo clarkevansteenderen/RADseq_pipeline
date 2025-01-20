@@ -12,14 +12,16 @@ nohup wget -r -nH --cut-dirs=1 --user=Clarke.vanSteenderen --password=password_h
 
 Organise folders so that each plate has its own directory, for example:
 
-your_repository/  
-├── data/  
-│   ├── plate_1/  
-│   │   └── filenameA_R1_001.fastq    
-│   │   └── filenameA_R2_001.fastq   
-│   ├── plate_2/    
-│   │   └── filenameB_R1_002.fastq    
-│   │   └── filenameB_R2_002.fastq    
+```plaintext
+your_repository/
+└── your_data_folder/
+    ├── plate_1/
+    │   ├── filenameA_R1_001.fastq
+    │   └── filenameA_R2_001.fastq
+    └── plate_2/
+        ├── filenameB_R1_002.fastq
+        └── filenameB_R2_002.fastq
+```
 
 :bulb: **NB: each plate folder has to be named plate_1, plate_2, up to plate_n**
 
@@ -53,6 +55,6 @@ I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII-I-IIIIIIIIIIIIIIIIIIIIIIIIII9IIIIIII
 @LH00504:37:22MMNWLT3:2:1101:48164:1016 2:N:0:ACGTTACC+TTGTCGGT
 GNTCGTTGTAATTCAATGATCTCAAGTTATGTGCACAAATTGGAAACAACGACTTAGCCTTGTGTTCTTGCCATTTTGACACCTGTTCGATGTTTCGGCTATAACTTCTTCGTTTGAGCTCTAAATGAGGCAGTTCAAGAGGCNGTGNAA
 
-
+# 
 
 

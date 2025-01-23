@@ -83,14 +83,12 @@ your_repository/
 zcat plate_1/filenameA_R1_001.fastq | head
 ```
 
-Example output:
+Example output showing the first fragment. The first bold section, **TNATGGTCAAT**, indicates the internal barcode on the Read 1 fragment, and the italics section, *CGG*, indicates the enzyme cut-site. Here, that is the MspI enzyme cut site. The EcoRI cut-site is AATTC.
 
-@LH00504:37:22MMNWLT3:2:1101:48146:1016 1:N:0:ACGTTACC+TTGTCGGT
-TNATGGTCAATCGGGTGGAAATGTGGGGTGTAGGCTGCCTGGCCGAGCGGCCAAAGTGCTGATGCTGCTGATTTGGGGCGCCTGACCGGGCGCTTTTGCACAAACTGTGCTGCACACCCAACTAATGACTTATGGAGCGTTTTNCACTAT
+@LH00504:37:22MMNWLT3:2:1101:48146:1016 1:N:0:**ACGTTACC+TTGTCGGT** ⬅️ external barcode, indicating which plate the fragment came from
+**TNATGGTCAAT***CGG*GTGGAAATGTGGGGTGTAGGCTGCCTGGCCGAGCGGCCAAAGTGCTGATGCTGCTGATTTGGGGCGCCTGACCGGGCGCTTTTGCACAAACTGTGCTGCACACCCAACTAATGACTTATGGAGCGTTTTNCACTAT
 +
 I#IIIIII-99I9IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII9IIIIIIIIIIIIIIIIIIIIIII9IIIIIIIIIIIIIIIII9IIIIIIII9IIIIIIIIII#9III9I
-@LH00504:37:22MMNWLT3:2:1101:48164:1016 1:N:0:ACGTTACC+TTGTCGGT
-TNATGGTCAATCGGGTGGAAATGTGGGGTGTAGGCTGCCTGGCCGAGCGGCCAAAGTGCTGATGCTGCTGATTTGGGGCGCCTGACCGGGCGCTTTTGCACAAACTGTGCTGCACACCCAACTAATGACTTATGGAGCGTTTTTAACTAT
 
 **Read 2:**
 
@@ -98,12 +96,10 @@ TNATGGTCAATCGGGTGGAAATGTGGGGTGTAGGCTGCCTGGCCGAGCGGCCAAAGTGCTGATGCTGCTGATTTGGGGCG
 zcat plate_1/filenameA_R2_001.fastq | head
 ```
 
-@LH00504:37:22MMNWLT3:2:1101:48146:1016 2:N:0:ACGTTACC+TTGTCGGT
-GNTCGTTGTAATTCAATGATCTCAAGTTATGTGCACAAATTGGAACCAACGACTTAGCCTTGTGTTCTTGCCATTTTGACACCTGTTCGATGTTTCGGCTATAACTTCTTCGTTTGCGCTCTAAATGAGGCAGTTCAAGAGGCNGTGNAA
+@LH00504:37:22MMNWLT3:2:1101:48146:1016 2:N:0:**ACGTTACC+TTGTCGGT**
+**GNTCGTTGT***AATTC*AATGATCTCAAGTTATGTGCACAAATTGGAACCAACGACTTAGCCTTGTGTTCTTGCCATTTTGACACCTGTTCGATGTTTCGGCTATAACTTCTTCGTTTGCGCTCTAAATGAGGCAGTTCAAGAGGCNGTGNAA
 +
 I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII-I-IIIIIIIIIIIIIIIIIIIIIIIIII9IIIIIIIIIIIIIIIIIIIIIII-IIIII9IIIIIIIIIIIII-IIIIII-IIIIIIII-IIII9IIIII#-II#-I
-@LH00504:37:22MMNWLT3:2:1101:48164:1016 2:N:0:ACGTTACC+TTGTCGGT
-GNTCGTTGTAATTCAATGATCTCAAGTTATGTGCACAAATTGGAAACAACGACTTAGCCTTGTGTTCTTGCCATTTTGACACCTGTTCGATGTTTCGGCTATAACTTCTTCGTTTGAGCTCTAAATGAGGCAGTTCAAGAGGCNGTGNAA
 
 # 🗒️ Scripts
 
@@ -140,6 +136,17 @@ This creates a subset of the larger datafile, so that you can test out your scri
 fastqc checks the quality and basic stats of the data, and produces HTML files as output. Change the **BASE_DIR** and **NUM_PLATES** parameters accordingly in the script.
 
 ## Demultiplexing
+
+Demultiplexing is the step of extracting each individual sample from the huge data file by searching for its unique index combination (each well of a 96-well plate has a unique barcode/index, as per the lab protocol). The Stacks site details all the software parameters needed to run **process_radtags** here: https://catchenlab.life.illinois.edu/stacks/comp/process_radtags.php 
+In this example, we used two restriction enzymes, namely MspI and EcoRI. This is the meat of the job script:
+
+```
+process_radtags -P -p ./$PLATE_DIR -b $BARCODE_FILE -o $OUTPUT_DIR -c -q -r -D -t 140 --inline_inline --renz_1 mspI --renz_2 ecoRI --barcode-dist-2 2 --filter-illumina
+```
+
+This will generate a folder called **stacks_output**, which will contain a sub-folder for each plate. Each plate folder will contain all the samples that have been demultiplexed.
+
+The script automatically creates another new folder at the end of the run called **combined_plates**, into which it copies all the samples from all the plates to keep them all in the same place. It does this even if there was only one plate, such that the **combined_plates** folder is used downstream regardless. During the cleaning steps in process_radtags, some samples are removed due to low quality. The script also removes sample files with abnormally low sizes. Due to this, the script automatically generates a new file in the barcodes folder (**bothplates_pops.txt**) with the remaining sample names and their assigned populations.
 
 ## 🔵 DENOVO (no reference genome)
 

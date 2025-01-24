@@ -148,7 +148,7 @@ This will generate a folder called **stacks_output**, which will contain a sub-f
 
 The script automatically creates another new folder at the end of the run called **combined_plates**, into which it copies all the samples from all the plates to keep them all in the same place. It does this even if there was only one plate, such that the **combined_plates** folder is used downstream regardless. During the cleaning steps in process_radtags, some samples are removed due to low quality. The script also removes sample files with abnormally low sizes. Due to this, the script automatically generates a new file in the barcodes folder (**bothplates_pops.txt**) with the remaining sample names and their assigned populations.
 
-#### Barcode file
+### Barcode file
 
 The unique **internal** barcodes for each sample come from this reference table, showing just the first column of a 96-well plate (wells A1 - H1). These are universal, and the same across all projects. Different plates are differentiated by a unique **external** barcodes, otherwise sample A1 on plate 1 will not be distinguishable from sample A1 on plate 2, etc. These internal barcodes come from the supplementary files in the Adapterama III paper (https://pmc.ncbi.nlm.nih.gov/articles/PMC6791345/). We used the i7 iTru EcoRI indexes (Design 1) and i5 iTru ClaI indexes (Design 2) (see the **peerj-07-7724-s003.xlsx** supplementary file). We annealed the upper and lower oligos ourselves in the lab.
 
@@ -167,11 +167,28 @@ Internal indexes for the first column of a 96-well plate:
 | G | 1 | G1 | CTGCAACTAT | CTAACGT |
 | H | 1 | H1 | TCATGGTCAAT | CTAACGT |
 
+💡Notice the additional **AT** on the i5 indexes, and the additional **T** on the i7 indexes. I added these manually, based on inspection of the fragment sequences.
+
+# 🛠️ ASSEMBLY
+
+Once all the fragments have been grouped into their correct sample ID files, the fragments for each sample need to be assembled into partial genome sequences. This can be done with (guided by an existing genome of a close relative or the same species) or without (*denovo*) a reference. Both approaches are provided.
+
 ## 🔵 DENOVO (no reference genome)
 
 ### 🔵 Assembly: denovo
 
+The **stacks_denovo.job** script runs the Stacks **denovo_map.pl** function with these paramaters:
+
+```plaintext
+denovo_map.pl -m 3 -n 4 -M 3 -T 8 -o ./stacksoutput_denovo --popmap ./barcodes/bothplates_pops.txt --samples ./stacksoutput/combined_plates/ready --rm-pcr-duplicates --paired --min-samples-per-pop 0.75 --min-populations 2 -X "populations:--fstats"
+
+```
+
+The script allows for you to specify a text file containing sample names that you wish to exclude from the analysis, if you want to. Put this file intot the **stacksoutput/combined_plates/ready** folder, and edit the name of the file in the job script (default is **file_list=samples_to_exclude.txt**).
+
 ### 🔵 Additional population assignment/s
+
+Population assignments are made when denovo_map.pl is run, and so this **stacks_populations_denovo.job** script allows for **populations** to be run again with alternative population assignments (if desired), and additional output formats. For example, perhaps the initial populations file grouped samples into broad categories, for example countries. Perhaps now you want to re-run the analysis, but provide finer-scale categories, such as provinces within countries. Only the popmap file changes.
 
 ## 🟡 REFERENCE GENOME
 

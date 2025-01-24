@@ -3,6 +3,21 @@
 
 Contact Clarke van Steenderen at vsteenderen@gmail.com or clarke.vansteenderen@ru.ac.za for queries
 <br><br> 
+
+# Table of Contents
+- [Downloading data: FTP method via Linux](#downloading-data-ftp-method-via-linux)
+- [File organisation](#file-organisation)
+- [Viewing data - quick overview](#viewing-data---quick-overview)
+- [Scripts](#scripts)
+- [Subsampling](#subsampling)
+- [FASTQC](#fastqc)
+- [Demultiplexing](#demultiplexing)
+- [Barcode file](#barcode-file)
+- [ASSEMBLY](#assembly)
+- [DENOVO (no reference genome)](#denovo-no-reference-genome)
+- [REFERENCE GENOME](#reference-genome)
+- [DOWNSTREAM](#downstream)
+- [fastSTRUCTURE](#faststructure)
                         
 ## Downloading data: FTP method via Linux
 
@@ -101,7 +116,7 @@ zcat plate_1/filenameA_R2_001.fastq | head
 +
 I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII-I-IIIIIIIIIIIIIIIIIIIIIIIIII9IIIIIIIIIIIIIIIIIIIIIII-IIIII9IIIIIIIIIIIII-IIIIII-IIIIIIII-IIII9IIIII#-II#-I
 
-# 🗒️ Scripts
+# Scripts
 
 Each script is in the form of a .job file that can be run on a Linux system. These have been tailored to be submitted on a PBS on the CHPC server. Before submitting a script, make sure that the #PBS headers are correct for your particular project by editing the **-o** and **-e** output paths, the project code (**-P**), and your email address (**-M**). Also make sure that you **cd** into the correct directory. For example:
 
@@ -169,11 +184,11 @@ Internal indexes for the first column of a 96-well plate:
 
 💡Notice the additional **AT** on the i5 indexes, and the additional **T** on the i7 indexes. I added these manually, based on inspection of the fragment sequences.
 
-# 🛠️ ASSEMBLY
+# ASSEMBLY
 
 Once all the fragments have been grouped into their correct sample ID files, the fragments for each sample need to be assembled into partial genome sequences. This can be done with (guided by an existing genome of a close relative or the same species) or without (*denovo*) a reference. Both approaches are provided.
 
-## 🔵 DENOVO (no reference genome)
+## DENOVO (no reference genome)
 
 ### 🔵 Assembly: denovo
 
@@ -190,7 +205,7 @@ The script allows for you to specify a text file containing sample names that yo
 
 Population assignments are made when denovo_map.pl is run, and so this **stacks_populations_denovo.job** script allows for **populations** to be run again with alternative population assignments (if desired), and additional output formats. For example, perhaps the initial populations file grouped samples into broad categories, for example countries. Perhaps now you want to re-run the analysis, but provide finer-scale categories, such as provinces within countries. Only the popmap file changes.
 
-## 🟡 REFERENCE GENOME
+## REFERENCE GENOME
 
 ### 🟡 Preparing a reference genome (if available!)
 

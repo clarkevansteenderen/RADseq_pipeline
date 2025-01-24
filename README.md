@@ -148,6 +148,21 @@ This will generate a folder called **stacks_output**, which will contain a sub-f
 
 The script automatically creates another new folder at the end of the run called **combined_plates**, into which it copies all the samples from all the plates to keep them all in the same place. It does this even if there was only one plate, such that the **combined_plates** folder is used downstream regardless. During the cleaning steps in process_radtags, some samples are removed due to low quality. The script also removes sample files with abnormally low sizes. Due to this, the script automatically generates a new file in the barcodes folder (**bothplates_pops.txt**) with the remaining sample names and their assigned populations.
 
+#### Barcode file
+
+The unique **internal** barcodes for each sample come from this reference table, showing just the first column of a 96-well plate (wells A1 - H1). These are universal, and the same across all projects. Different plates are differentiated by a unique **external** barcodes, otherwise sample A1 on plate 1 will not be distinguishable from sample A1 on plate 2, etc. These internal barcodes come from the supplementary files in the Adapterama III paper (https://pmc.ncbi.nlm.nih.gov/articles/PMC6791345/). We used the i7 iTru EcoRI indexes (Design 1) and i5 iTru ClaI indexes (Design 2) (see the **peerj-07-7724-s003.xlsx** supplementary file).
+
+| **row** | **col** | **well** | **i5_index** | **i7_index** |
+|---|---|---|---|---|
+| A | 1 | A1 | CCGAATAT | CTAACGT |
+| B | 1 | B1 | TTAGGCAAT | CTAACGT |
+| C | 1 | C1 | AACTCGTCAT | CTAACGT |
+| D | 1 | D1 | GGTCTACGTAT | CTAACGT |
+| E | 1 | E1 | GATACCAT | CTAACGT |
+| F | 1 | F1 | AGCGTTGAT | CTAACGT |
+| G | 1 | G1 | CTGCAACTAT | CTAACGT |
+| H | 1 | H1 | TCATGGTCAAT | CTAACGT |
+
 ## 🔵 DENOVO (no reference genome)
 
 ### 🔵 Assembly: denovo

@@ -150,7 +150,11 @@ The script automatically creates another new folder at the end of the run called
 
 #### Barcode file
 
-The unique **internal** barcodes for each sample come from this reference table, showing just the first column of a 96-well plate (wells A1 - H1). These are universal, and the same across all projects. Different plates are differentiated by a unique **external** barcodes, otherwise sample A1 on plate 1 will not be distinguishable from sample A1 on plate 2, etc. These internal barcodes come from the supplementary files in the Adapterama III paper (https://pmc.ncbi.nlm.nih.gov/articles/PMC6791345/). We used the i7 iTru EcoRI indexes (Design 1) and i5 iTru ClaI indexes (Design 2) (see the **peerj-07-7724-s003.xlsx** supplementary file).
+The unique **internal** barcodes for each sample come from this reference table, showing just the first column of a 96-well plate (wells A1 - H1). These are universal, and the same across all projects. Different plates are differentiated by a unique **external** barcodes, otherwise sample A1 on plate 1 will not be distinguishable from sample A1 on plate 2, etc. These internal barcodes come from the supplementary files in the Adapterama III paper (https://pmc.ncbi.nlm.nih.gov/articles/PMC6791345/). We used the i7 iTru EcoRI indexes (Design 1) and i5 iTru ClaI indexes (Design 2) (see the **peerj-07-7724-s003.xlsx** supplementary file). We annealed the upper and lower oligos ourselves in the lab.
+
+We used the external indexes **iTru5_01_A** and **iTru7_101_01** for our one plate (see the **iTru_i5_primers** and **iTru_i7_primers** tabs in the supplementary Adapterama III file).
+
+Internal indexes for the first column of a 96-well plate:
 
 | **row** | **col** | **well** | **i5_index** | **i7_index** |
 |---|---|---|---|---|

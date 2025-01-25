@@ -153,7 +153,23 @@ fastqc checks the quality and basic stats of the data, and produces HTML files a
 ## Demultiplexing
 
 Demultiplexing is the step of extracting each individual sample from the huge data file by searching for its unique index combination (each well of a 96-well plate has a unique barcode/index, as per the lab protocol). The Stacks site details all the software parameters needed to run **process_radtags** here: https://catchenlab.life.illinois.edu/stacks/comp/process_radtags.php 
-In this example, we used two restriction enzymes, namely MspI and EcoRI. This is the meat of the job script:
+In this example, we used two restriction enzymes, namely MspI and EcoRI. 
+
+Before running **stacks_demultiplex.job**, create a folder called **stacksoutput** in your working directory. I.e. the file organisation should resemble:
+
+```plaintext
+your_repository/  
+└── your_RADseq_data_folder/  
+    ├── plate_1/  
+    │   ├── filenameA_R1_001.fastq.gz  
+    │   └── filenameA_R2_001.fastq.gz  
+    └── barcodes/  
+    │   ├── internal_indexes_plate_1.txt     
+    │   └── pops_all.txt
+    └── stacksoutput/
+```
+
+This is the meat of the job script:
 
 ```
 process_radtags -P -p ./$PLATE_DIR -b $BARCODE_FILE -o $OUTPUT_DIR -c -q -r -D -t 140 --inline_inline --renz_1 mspI --renz_2 ecoRI --barcode-dist-2 2 --filter-illumina

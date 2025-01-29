@@ -58,7 +58,7 @@ uk.ac.babraham.FastQC.Sequence.SequenceFormatException: Ran out of data in the m
 
 ⚠️ **We ended up requesting datashring via BaseSpace.**
 
-<br><br> 
+<br>
 
 ## ❗ File organisation: get this prepped before running any job scripts ❗
 

@@ -296,28 +296,6 @@ This will generate a folder called **stacks_output**, which will contain a sub-f
 
 The **stacks_demultiplex_postprocess.job** script automatically creates another new folder called **combined_plates**, into which it copies all the samples from all the plates to keep them all in the same place. It does this even if there was only one plate, such that the **combined_plates** folder is used downstream regardless. During the cleaning steps in process_radtags, some samples are removed due to low quality. The script also removes sample files with abnormally low sizes. Due to this, the script automatically generates a new file in the barcodes folder (**bothplates_pops.txt**) with the remaining sample names and their assigned populations. Once this is all done, all the processed and read-to-go samples will be in a folder called **ready**, i.e. **./stacksoutput/combined_plates/ready**
 
-At this point, running the Stacks denovo job on a very large dataset takes forever (I found that it could take up to 48 hours to process just 10 samples!). The workaround I have implemented is to subdivide all the samples in the **ready/** folder (keeping the original intact, but making copies of the files), so that a new folder is created for every five samples. I.e. If there are 25 samples in the **ready/** folder, five new folders will be created, each containing five samples (or rather, five pairs of files, since there is a R1 and R2 file per sample). These will be called **ready_sub1** through to **ready_sub5**. The structure will look like this:
-
-```plaintext
-
-└── stacksoutput/
-    ├── combined_plates/  
-    │   ├── ready/  (contains all samples)	
-    │   └── ready_sub1/	(contains the first five samples)
-    │   └── ready_sub2/ (contains the second five samples)
-.....
-```
-
-The script also creates subdivided population files in the **barcodes/** folder to match these, so that the denovo_map.pl function gets the correct population assignments for every group of five samples. This way, you can submit multiple jobs to the job queue, and run them all simultaneously.
-
-To submit the stacks_denovo script as a loop for simultaneous jobs, use:
-
-```plaintext
-for k in {1..17}; do qsub -N stacks_denovo_${k} -v K=${k},READY_FOLDER=ready_sub${k},POPS=sub${k}_pops.txt 4_stacks_denovo.job; done
-```
-
-Where you need to change the ``{1..17}`` part depending on the number of subfolders you have (here, I had 84 samples that were divided into 17 subfolders). 
-
 ### Barcode file
 
 The unique **internal** barcodes for each sample come from this reference table, showing just the first column of a 96-well plate (wells A1 - H1). These are universal, and the same across all projects. Different plates are differentiated by a unique **external** barcodes, otherwise sample A1 on plate 1 will not be distinguishable from sample A1 on plate 2, etc. These internal barcodes come from the supplementary files in the Adapterama III paper (https://pmc.ncbi.nlm.nih.gov/articles/PMC6791345/). We used the i7 iTru EcoRI indexes (Design 1) and i5 iTru ClaI indexes (Design 2) (see the **peerj-07-7724-s003.xlsx** supplementary file). We annealed the upper and lower oligos ourselves in the lab.

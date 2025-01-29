@@ -177,25 +177,49 @@ qsub -v NUM_PLATES=1 2_fastqc.job
 qsub -v NUM_PLATES=1 3_stacks_demultiplex.job
 
 ✔️ # process the outputs from the demultiplexing step ➡️ get the demultiplexed samples from all plates into one ready-to-go folder,
-# remove abnormally small files, update the barcodes/pops_all.txt to match the remaining samples, and create subsets of the demultiplexed samples so that many smaller jobs can be submitted at once
+# remove abnormally small files, and update the barcodes/pops_all.txt to match the remaining samples
 qsub -v NUM_PLATES=1 3.1_stacks_demultiplex_postprocess.job
 ```
 
 ### 🔵 Denovo assembly
+
+Test run this to see how long the **4_stacks_denovo.job** script takes to process. If you're averaging 5 or 6 samples in 24 to 18 hours, then rather run ustacks, cstacks, sstacks, tsv2bam, gstacks and populations separately, rather than in the all-encompassing **denovo_map.pl** function. This approach is shown below this section.
+
+For the all-in-one **denovo_map.pl** approach:
+
 ```
 ✔️ # if you do not have a reference genome, run the stacks denovo script via the loop below. Otherwise skip to the refgenome script further down
-# in this example, we have ended up with 17 subsetted folders of sample data, each folder containing five samples (the 17th folder contains 4 samples, as there was a total of 84)
-# this loop automatically submits a separate job for each of the 17 subsetted data folders, and provides the associated pops.txt file that contains the specific 5 sample IDs with population assignments
-# you can select any range of folders: perhaps you just want to do the first 5, then change it to {1..5}
-for k in {1..17}; do qsub -N stacks_denovo_${k} -v K=${k},READY_FOLDER=ready_sub${k},POPS=sub${k}_pops.txt 4_stacks_denovo.job; done
-
-✔️ # postprocessing of the denovo outputs (getting all the subsets back into one merged folder for further use)
-qsub 4.1_stacks_denovo_postprocess.job
+qsub 4_stacks_denovo.job	
 
 ✔️ # run the Stacks populations function again, this time to produce results in other file formats, and also to provide alternative groupings to your samples. E.g. maybe you want to group your samples broadly into
 # countries of origin, invasive status, particular province or habitat type, etc. Be sure to add these alternative pop.txt files into the barcodes/ folder, and adjust the job file below accordingly
 qsub 5_stacks_populations_denovo.job
 ```
+
+If the all-in-one **denovo_map.pl** approach takes too long:
+
+```
+✔️ # run ustacks separately, as this is what seems to require the most memory. You need to run each sample individually, as a separate job
+# change the start and end to the range of sample files in the ready/ folder that you want to process. Here we're doing sample files 1 to 10
+# check the max number of jobs allowed on the CHPC (seems to be 10). Work progressively through all the samples ➡️ change start to 11 and end to 21, until you get to the 84th sample (or however many you have)
+
+start=1
+end=10
+find /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput/combined_plates/ready -type f -name "*.1.fq.gz" | sed -n "${start},${end}p" | while read file; do sample_name=$(basename "$file" .fq.gz); qsub -N ustacks_${sample_name} -v FILE="$file",SAMPLE_NAME="$sample_name" ustacks_loop.job; done
+
+✔️
+qsub cstacks.job
+✔️
+qsub sstacks.job
+✔️
+qsub tsv2bam.job
+✔️
+qsub gstacks.job
+✔️ # edit accordingly (if you want additional populations assignments)
+qsub 5_stacks_populations_denovo.job
+
+```
+
 
 ### 🟡 With a reference genome available
 

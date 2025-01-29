@@ -91,6 +91,8 @@ your_repository/
     │   ├── internal_indexes_plate_1.txt  
     │   ├── internal_indexes_plate_2.txt  
     │   └── pops_all.txt
+    └──ref_genome/	
+	├── ncbi_dataset/ (other applicable folders here, if a reference genome is available) 
 
 ```
 
@@ -110,15 +112,15 @@ your_repository/
 	├── 8_samtools_sort_stats_refgenome.job		
 	├── 9_stacks_refgenome.job			
 	├── 10_stacks_populations_refgenome.job	
-└── ref_genome/	
-	├── ncbi_dataset/ (other applicable folders here, if a reference genome is available) 
 └── your_RADseq_data_folder/  
     ├── plate_1/  
     │   ├── filenameA_R1_001.fastq.gz  
     │   └── filenameA_R2_001.fastq.gz  
     └── barcodes/  
     │   ├── internal_indexes_plate_1.txt     
-    │   └── pops_all.txt  
+    │   └── pops_all.txt
+    └──ref_genome/	
+	├── ncbi_dataset/ (other applicable folders here, if a reference genome is available) 
 ```
 
 ## Viewing data - quick overview
@@ -152,13 +154,40 @@ I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII-I-IIIIIIIIIIIIIIIIIIIIIIIIII9IIIIIII
 ## Summary of the order of job submissions
 
 ⚠️ This is assuming that the above folder structure has been correctly set up, with all the correct indexes for samples, and associated population assignments in the **barcodes/** folder.
+Each script defaults to the base directory (**BASE_DIR** in the scripts) shown as **your_RADseq_data_folder/** in the directory layout shown above. Be sure to change this to match your file structure before running.
+
+This is an example of the full pipeline. Run each script to completion before running the next, as subsequent jobs often rely on the outputs of the previous job.
 
 ```plaintext
-ssh -o "ServerAliveInterval 60" cvansteenderen@lengau.chpc.ac.za
-password
+ssh -o "ServerAliveInterval 60" cvansteenderen@lengau.chpc.ac.za	
+password_here	
 
-cd /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/job_files
+cd your_repository/job_files
+# on a HPC for example: cd /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/job_files
 
+✔️ # subsample the data into a smaller chunk to use for testing, if you want!
+qsub 1_seqkit_subsampling.job
+
+✔️ # run fastqc to get a quality report for your data
+# specify how many plates you want to process (here it's set to 1)
+qsub -v NUM_PLATES=1 2_fastqc.job 
+
+✔️ # demultiplex samples, using the barcode index file to differentiate between samples
+✔️ # check that the process_radtags function adheres to the parameters you want (enzyme choice, fragment length, etc.)
+qsub -v NUM_PLATES=1 3_stacks_demultiplex.job
+
+✔️ # process the outputs from the demultiplexing step ➡️ get the demultiplexed samples from all plates into one ready-to-go folder,
+# remove abnormally small files, update the barcodes/pops_all.txt to match the remaining samples, and create subsets of the demultiplexed samples so that many smaller jobs can be submitted at once
+qsub -v NUM_PLATES=1 3.1_stacks_demultiplex_postprocess.job
+
+✔️ # if you do not have a reference genome, run the stacks denovo script via the loop below. Otherwise go to the refgenome script further down
+# in this example, we have ended up with 17 subsetted folders of sample data, each folder containing five samples (the 17th folder contains 4 samples, as there was a total of 84)
+# this loop automatically submits a separate job for each of the 17 subsetted data folders, and provides the associated pops.txt file that contains the specific 5 sample IDs with population assignments
+# you can select any range of folders: perhaps you just want to do the first 5, then change it to {1..5}
+for k in {1..17}; do qsub -N stacks_denovo_${k} -v K=${k},READY_FOLDER=ready_sub${k},POPS=sub${k}_pops.txt 4_stacks_denovo.job; done
+
+✔️ # postprocessing of the denovo outputs (getting all the subsets back into one merged folder for further use)
+qsub 4.1_stacks_denovo_postprocess.job 
 ```
 
 Each script is in the form of a .job file that can be run on a Linux system. These have been tailored to be submitted on a PBS on the CHPC server. Before submitting a script, make sure that the #PBS headers are correct for your particular project by editing the **-o** and **-e** output paths, the project code (**-P**), and your email address (**-M**). Also make sure that you **cd** into the correct directory. For example:

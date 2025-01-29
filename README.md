@@ -158,6 +158,8 @@ Each script defaults to the base directory (**BASE_DIR** in the scripts) shown a
 
 This is an example of the full pipeline. Run each script to completion before running the next, as subsequent jobs often rely on the outputs of the previous job.
 
+### Setting up
+
 ```plaintext
 ssh -o "ServerAliveInterval 60" cvansteenderen@lengau.chpc.ac.za	
 password_here	
@@ -179,15 +181,27 @@ qsub -v NUM_PLATES=1 3_stacks_demultiplex.job
 ✔️ # process the outputs from the demultiplexing step ➡️ get the demultiplexed samples from all plates into one ready-to-go folder,
 # remove abnormally small files, update the barcodes/pops_all.txt to match the remaining samples, and create subsets of the demultiplexed samples so that many smaller jobs can be submitted at once
 qsub -v NUM_PLATES=1 3.1_stacks_demultiplex_postprocess.job
+```
 
-✔️ # if you do not have a reference genome, run the stacks denovo script via the loop below. Otherwise go to the refgenome script further down
+### 🔵 Denovo assembly
+```
+✔️ # if you do not have a reference genome, run the stacks denovo script via the loop below. Otherwise skip to the refgenome script further down
 # in this example, we have ended up with 17 subsetted folders of sample data, each folder containing five samples (the 17th folder contains 4 samples, as there was a total of 84)
 # this loop automatically submits a separate job for each of the 17 subsetted data folders, and provides the associated pops.txt file that contains the specific 5 sample IDs with population assignments
 # you can select any range of folders: perhaps you just want to do the first 5, then change it to {1..5}
 for k in {1..17}; do qsub -N stacks_denovo_${k} -v K=${k},READY_FOLDER=ready_sub${k},POPS=sub${k}_pops.txt 4_stacks_denovo.job; done
 
 ✔️ # postprocessing of the denovo outputs (getting all the subsets back into one merged folder for further use)
-qsub 4.1_stacks_denovo_postprocess.job 
+qsub 4.1_stacks_denovo_postprocess.job
+
+✔️ # run the Stacks populations function again, this time to produce results in other file formats, and also to provide alternative groupings to your samples. E.g. maybe you want to group your samples broadly into
+# countries of origin, invasive status, particular province or habitat type, etc. Be sure to add these alternative pop.txt files into the barcodes/ folder, and adjust the job file below accordingly
+qsub 5_stacks_populations_denovo.job
+```
+
+### 🟡 With a reference genome available
+```
+
 ```
 
 Each script is in the form of a .job file that can be run on a Linux system. These have been tailored to be submitted on a PBS on the CHPC server. Before submitting a script, make sure that the #PBS headers are correct for your particular project by editing the **-o** and **-e** output paths, the project code (**-P**), and your email address (**-M**). Also make sure that you **cd** into the correct directory. For example:

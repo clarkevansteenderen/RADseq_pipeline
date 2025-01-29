@@ -56,14 +56,30 @@ uk.ac.babraham.FastQC.Sequence.SequenceFormatException: Ran out of data in the m
 	at java.base/java.lang.Thread.run(Thread.java:833)
 ```
 
-We ended up requesting datashring via BaseSpace.
+⚠️ **We ended up requesting datashring via BaseSpace.**
 
-## File organisation
+<br><br> 
+
+## ❗ File organisation: get this prepped before running any job scripts ❗
 
 The main project folder should contain a folder for each plate's fastq.gz data (here **plate_1** and **plate_2**), and a **barcodes** folder, containing the internal indexes for the samples on each plate (here internal_indexes_plate_1.txt and internal_indexes_plate_2.txt), and the population assignments (pops_all.txt file). You need to create the internal index and populations files beforehand, using the R scripts provided in the **R_scripts** folder (internal_index_generator.R and pop_file_generator.R). The internal_index_ref.xlsx file is universal, assuming that the same internal indexes are used for all projects. Otherwise, change this accordingly. The pop_file_generator.R script will need the relevant sample information (sample_info.xlsx) for the particular project. Once these files have been generated, your project file structure should look like this for two plates: 
 
 ```plaintext
-your_repository/  
+your_repository/
+└── job_files/
+	├── 1_seqkit_subsampling.job	
+	├── 2_fastqc.job
+	├── 3_stacks_demultiplex		
+	├── 3.1_stacks_demultiplex_postprocess
+	├── 4_stacks_denovo.job	
+	├── 5_stacks_populations_denovo.job	
+	├── 6_bowtie_indexing_refgenome.job			
+	├── 7_bowtie_aligning_refgenome.job	
+	├── 8_samtools_sort_stats_refgenome.job		
+	├── 9_stacks_refgenome.job			
+	├── 10_stacks_populations_refgenome.job	
+└── ref_genome/	
+	├── ncbi_dataset/ (other applicable folders here, if a reference genome is available)	
 └── your_RADseq_data_folder/  
     ├── plate_1/  
     │   ├── filenameA_R1_001.fastq.gz  
@@ -74,13 +90,28 @@ your_repository/
     └── barcodes/  
     │   ├── internal_indexes_plate_1.txt  
     │   ├── internal_indexes_plate_2.txt  
-    │   └── pops_all.txt  
+    │   └── pops_all.txt
+
 ```
 
 For clarity, one plate of data will look like this:
 
 ```plaintext
-your_repository/  
+your_repository/
+└── job_files/
+	├── 1_seqkit_subsampling.job	
+	├── 2_fastqc.job
+	├── 3_stacks_demultiplex		
+	├── 3.1_stacks_demultiplex_postprocess
+	├── 4_stacks_denovo.job	
+	├── 5_stacks_populations_denovo.job	
+	├── 6_bowtie_indexing_refgenome.job			
+	├── 7_bowtie_aligning_refgenome.job	
+	├── 8_samtools_sort_stats_refgenome.job		
+	├── 9_stacks_refgenome.job			
+	├── 10_stacks_populations_refgenome.job	
+└── ref_genome/	
+	├── ncbi_dataset/ (other applicable folders here, if a reference genome is available) 
 └── your_RADseq_data_folder/  
     ├── plate_1/  
     │   ├── filenameA_R1_001.fastq.gz  
@@ -117,6 +148,18 @@ zcat plate_1/filenameA_R2_001.fastq | head
 I#IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII-I-IIIIIIIIIIIIIIIIIIIIIIIIII9IIIIIIIIIIIIIIIIIIIIIII-IIIII9IIIIIIIIIIIII-IIIIII-IIIIIIII-IIII9IIIII#-II#-I
 
 # Scripts
+
+## Summary of the order of job submissions
+
+⚠️ This is assuming that the above folder structure has been correctly set up, with all the correct indexes for samples, and associated population assignments in the **barcodes/** folder.
+
+```plaintext
+ssh -o "ServerAliveInterval 60" cvansteenderen@lengau.chpc.ac.za
+password
+
+cd /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/job_files
+
+```
 
 Each script is in the form of a .job file that can be run on a Linux system. These have been tailored to be submitted on a PBS on the CHPC server. Before submitting a script, make sure that the #PBS headers are correct for your particular project by editing the **-o** and **-e** output paths, the project code (**-P**), and your email address (**-M**). Also make sure that you **cd** into the correct directory. For example:
 

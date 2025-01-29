@@ -62,6 +62,8 @@ grep "overall alignment rate" refgen_align_stderr.txt | awk '{gsub("%", "", $1);
 
 paste samplenames2.txt alignment_rates.txt > refgenome_alignment_stats.txt
 
+# Make a new directory into which the sorted alignment can be written in the next script
+mkdir "$BASE_DIR/ref_genome/alignment_sorted"
 
 
 #bowtie2 -x "$REFERENCE_INDEX" -1 "SA7.8.1.fq.gz" -2 "SA7.8.2.fq.gz" | samtools view -bS -o "/mnt/lustre/users/cvansteenderen/RADseq/IcePlant.RawData/Ice_L1/ref_genome/alignment/SA7.8.bam"

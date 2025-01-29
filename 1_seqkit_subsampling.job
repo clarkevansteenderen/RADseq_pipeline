@@ -8,7 +8,7 @@
 #PBS -l select=2:ncpus=24:mpiprocs=24:mem=120gb
 #PBS -P CBBI1682
 #PBS -q normal
-#PBS -l walltime=2:00:00
+#PBS -l walltime=5:00:00
 #PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/seqkitstdout.txt
 #PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/seqkitstderr.txt
 #PBS -N seqkit_subsampling
@@ -20,23 +20,25 @@
 module add chpc/BIOMODULES
 module add seqkit
 
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
+
 # Change the path here accordingly
-cd /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata
+cd $BASE_DIR
 
 ##############################################################
 
 # Set the proportion of reads and seed for subsampling
 # Change to the number of plates 
 NUM_PLATES=1
-# here set to 0.5% of the data
-NUM_READS=0.005
+# here set to 0.01% of the data
+NUM_READS=0.0001
 SEED=100
 
 ##############################################################
 
 # Create the output directory if it doesn't exist
 # change name according to percent sub-sampled
-SUB_FOLDER=subsamples_0.5perc
+SUB_FOLDER=subsamples_0.001perc
 mkdir -p "$SUB_FOLDER"
 
 ##############################################################
@@ -62,10 +64,10 @@ for plate in $(seq 1 "$NUM_PLATES"); do
             sample_number=$(basename "$forward" | sed -E 's/.*_R[12]_([0-9]+)\.fastq\.gz/\1/')
 
             # Subsample read 1 and place R1 before the number
-            seqkit sample -2 -p $NUM_READS -s $SEED "$forward" -o "$SUB_FOLDER"/PLATE_DIR/subsampled_"$base_name"_R1_"$sample_number".fastq.gz
+            seqkit sample -2 -p $NUM_READS -s $SEED "$forward" -o "$SUB_FOLDER"/$PLATE_DIR/subsampled_"$base_name"_R1_"$sample_number".fastq.gz
 
             # Subsample corresponding read 2 and place R2 before the number
-            seqkit sample -2 -p $NUM_READS -s $SEED "$reverse" -o "$SUB_FOLDER"/PLATE_DIR/subsampled_"$base_name"_R2_"$sample_number".fastq.gz
+            seqkit sample -2 -p $NUM_READS -s $SEED "$reverse" -o "$SUB_FOLDER"/$PLATE_DIR/subsampled_"$base_name"_R2_"$sample_number".fastq.gz
 
             echo "Subsampled $base_name, sample number $sample_number"
         done

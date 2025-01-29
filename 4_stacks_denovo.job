@@ -2,25 +2,55 @@
 
 ############################################################################################
 # Submit this script as a job using:
-# qsub stacks_denovo.job
+# qsub -v READY_FOLDER=ready,POPS=bothplates_pops.txt stacks_denovo.job
+# change READY_FOLDER and POPS, depending on where the samples are and which pops file you want to use
+
+# qsub -v READY_FOLDER=ready_sub2,POPS=sub2_pops.txt 4_stacks_denovo.job
+
+# the READY_FOLDER should be in stacksoutput/combined_plates/$READY_FOLDER
+# the POPS file should be in barcodes/
+
+# to automatically submit multiple jobs to the queue that goes through a specified range of the subsetted sample folders and pop files,
+# use a loop like this (changing the 2..17 as needed):
+
+#for k in {2..17}; do qsub -N stacks_denovo_${k} -v K=${k},READY_FOLDER=ready_sub${k},POPS=sub${k}_pops.txt 4_stacks_denovo.job; done
+
 ############################################################################################
 
-#PBS -l select=10:ncpus=24:mpiprocs=24
+#PBS -l select=4:ncpus=24:mpiprocs=24:mem=120gb
 #PBS -P CBBI1682
 #PBS -q normal
-#PBS -l walltime=48:00:00
-#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_denovo/denovo_stdout.txt
-#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_denovo/denovo_stderr.txt
-#PBS -N stacks_denovo
+#PBS -l walltime=45:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/denovo_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/denovo_stderr.txt
 #PBS -M vsteenderen@gmail.com
 #PBS -m abe
 
 ##############################################################
 
+# Check if READY_FOLDER is set
+if [ -z "$READY_FOLDER" ]; then
+    echo "ERROR: READY_FOLDER variable is not set. Please provide it with '-v READY_FOLDER=<folder_name>' when submitting the job."
+    exit 1  # Exit with an error code
+fi
+
+# Check if POPS is set
+if [ -z "$POPS" ]; then
+    echo "ERROR: POPS variable is not set. Please provide it with '-v POPS=<pop_file>' when submitting the job."
+    exit 1  # Exit with an error code
+fi
+
+echo "Ready Folder: $READY_FOLDER"
+echo "Populations File: $POPS"
+
+# store in order to change the name of the -o and -e error log files 
+READY_FOLDER_NAME=$(basename $READY_FOLDER)
+
 module add chpc/BIOMODULES
 module add stacks
 
-BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
+
 # Do you have a list of samples you want to exclude from the analysis? If yes, change this to 1.
 EXCLUDE_SAMPLE_LIST=0
 
@@ -39,7 +69,11 @@ temp_folder=$(mktemp -d "$ready_folder/tempdir.XXXXXX")
 # List of samples to exclude
 # Read the file list from the text file
 # make sure there's a newline after the last sample name, otherwise it gets excluded
+
+# CHANGE ACCORDINGLY
+##########################################################
 file_list="$ready_folder/samples_to_exclude.txt"
+##########################################################
 
 # Loop through each file name in the text file and move the samples to exclude into the temporary folder 
 while IFS= read -r sample; do
@@ -82,8 +116,12 @@ join -t $'\t' "$BASE_DIR/barcodes/pops_all.txt" "$BASE_DIR/stacksoutput/combined
 
 ##############################################################
 
-# make a folder for the denovo outputs
-mkdir -p ./stacksoutput_denovo
+# make a folder for the denovo outputs, only if it doesn't exist already
+# I've created these separate subfolders so that each run has a log file for those samples, otherwise if everything
+# goes into one output folder, the simultaneous jobs overwrite the log file all the time
+if [ ! -d "./stacksoutput_denovo/stacks_denovo_${K}" ]; then
+    mkdir ./stacksoutput_denovo/stacks_denovo_${K}
+fi
 
 ##############################################################
 # Run Stacks with these settings
@@ -103,7 +141,20 @@ mkdir -p ./stacksoutput_denovo
 # assemble reads 
 ##############################################################
 
-denovo_map.pl -m 3 -n 4 -M 3 -T 8 -o ./stacksoutput_denovo --popmap ./barcodes/bothplates_pops.txt --samples ./stacksoutput/combined_plates/ready --rm-pcr-duplicates --paired --min-samples-per-pop 0.75 --min-populations 2 -X "populations:--fstats"
+# READY_FOLDER needs to be specified when the job is submitted
+# e.g. if you want to specify the folder that contains all the samples, use: 
+# qsub -v READY_FOLDER=ready,POPS=bothplates_pops.txt 4_stacks_denovo.job 
+
+# if you want to run the first five samples in the ready_sub1 folder, use:  
+# qsub -v READY_FOLDER=ready_sub1,POPS=sub1_pops.txt 4_stacks_denovo.job
+
+SAMPLE_FOLDER="$BASE_DIR/stacksoutput/combined_plates/$READY_FOLDER"
+POPS_FILE="$BASE_DIR/barcodes/$POPS"
+OUTPUT_FOLDER="./stacksoutput_denovo/stacks_denovo_${K}"
+
+denovo_map.pl -m 5 -n 3 -M 2 -T 10 -o $OUTPUT_FOLDER --popmap $POPS_FILE --samples $SAMPLE_FOLDER --rm-pcr-duplicates --paired --min-samples-per-pop 0.75 --min-populations 2 -X "populations:--fstats"
+
+#denovo_map.pl --dry-run -m 3 -n 3 -M 2 -T 10 -o ./stacksoutput_denovo --popmap ./barcodes/bothplates_pops.txt --samples ./stacksoutput/combined_plates/ready --rm-pcr-duplicates --paired --min-samples-per-pop 0.75 --min-populations 2 -X "populations:--fstats"
 
 ##############################################################
 

@@ -5,22 +5,27 @@
 # qsub fastqc.job
 ############################################################################################
 
-#PBS -l select=2:ncpus=24:mpiprocs=24:mem=120gb
+#PBS -l select=2:ncpus=24:mpiprocs=24:mem=124gb
 #PBS -P CBBI1682
 #PBS -q normal
-#PBS -l walltime=2:00:00
-#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/fastqc_stdout.txt
-#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/fastqc_stderr.txt
+#PBS -l walltime=4:30:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/plate_1/fastqc_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/plate_1/fastqc_stderr.txt
 #PBS -N fastqc
 #PBS -M vsteenderen@gmail.com
 #PBS -m abe
 
 ##############################################################
 
+#############################################################################################
+# fastqc did not work on the first round of fastq.gz files
+# use the unzip.job script to unzip and then rezip them before running fastqc 
+#############################################################################################
+
 module add chpc/BIOMODULES
 module add fastqc
 
-BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
 
 # Default to 1 plate if NUM_PLATES is not set here
 NUM_PLATES=1
@@ -33,7 +38,12 @@ for i in $(seq 1 "$NUM_PLATES"); do
     if [ -d "$PLATE_DIR" ]; then
         echo "Processing $PLATE_DIR..."
         cd "$PLATE_DIR" || { echo "Error: Could not change to $PLATE_DIR"; exit 1; }
-        fastqc -o "$PLATE_DIR" *.fastq.gz
+		
+		# try fastqc on the zipped files
+        fastqc -t 6 -o "$PLATE_DIR" *.fastq.gz
+		
+		# try fastqc on the unzipped files
+		#fastqc -t 6 -o "$PLATE_DIR" *.fastq
     else
         echo "Warning: Directory $PLATE_DIR does not exist. Skipping..."
     fi

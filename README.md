@@ -56,9 +56,7 @@ uk.ac.babraham.FastQC.Sequence.SequenceFormatException: Ran out of data in the m
 	at java.base/java.lang.Thread.run(Thread.java:833)
 ```
 
-⚠️ **We ended up requesting datashring via BaseSpace.**
-
-<br>
+⚠️ **We ended up requesting datasharing via BaseSpace, which downloaded the full files.**
 
 ## ❗ File organisation: get this prepped before running any job scripts ❗
 
@@ -200,8 +198,17 @@ qsub 5_stacks_populations_denovo.job
 ```
 
 ### 🟡 With a reference genome available
-```
 
+Once you have a reference genome downloaded, it requires some preprocessing.
+```
+✔️ # index the genome using bowtie2. Indexing makes the aligning process a lot faster later on, as the genome is broken up into smaller more manageable parts that can be searched through rapidly
+qsub 6_bowtie_indexing_refgenome.job
+
+✔️ # align our sample fragments to the reference genome using bowtie2, and convert to BAM files using samtools
+qsub 7_bowtie_aligning_refgenome.job
+
+✔️ # sort the BAM files created after aligning in the previous step
+qsub 8_samtools_sort_stats_refgenome.job
 ```
 
 Each script is in the form of a .job file that can be run on a Linux system. These have been tailored to be submitted on a PBS on the CHPC server. Before submitting a script, make sure that the #PBS headers are correct for your particular project by editing the **-o** and **-e** output paths, the project code (**-P**), and your email address (**-M**). Also make sure that you **cd** into the correct directory. For example:

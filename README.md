@@ -177,7 +177,29 @@ process_radtags -P -p ./$PLATE_DIR -b $BARCODE_FILE -o $OUTPUT_DIR -c -q -r -D -
 
 This will generate a folder called **stacks_output**, which will contain a sub-folder for each plate. Each plate folder will contain all the samples that have been demultiplexed.
 
-The script automatically creates another new folder at the end of the run called **combined_plates**, into which it copies all the samples from all the plates to keep them all in the same place. It does this even if there was only one plate, such that the **combined_plates** folder is used downstream regardless. During the cleaning steps in process_radtags, some samples are removed due to low quality. The script also removes sample files with abnormally low sizes. Due to this, the script automatically generates a new file in the barcodes folder (**bothplates_pops.txt**) with the remaining sample names and their assigned populations.
+The **stacks_demultiplex_postprocess.job** script automatically creates another new folder called **combined_plates**, into which it copies all the samples from all the plates to keep them all in the same place. It does this even if there was only one plate, such that the **combined_plates** folder is used downstream regardless. During the cleaning steps in process_radtags, some samples are removed due to low quality. The script also removes sample files with abnormally low sizes. Due to this, the script automatically generates a new file in the barcodes folder (**bothplates_pops.txt**) with the remaining sample names and their assigned populations. Once this is all done, all the processed and read-to-go samples will be in a folder called **ready**, i.e. **./stacksoutput/combined_plates/ready**
+
+At this point, running the Stacks denovo job on a very large dataset takes forever (I found that it could take up to 48 hours to process just 10 samples!). The workaround I have implemented is to subdivide all the samples in the **ready/** folder (keeping the original intact, but making copies of the files), so that a new folder is created for every five samples. I.e. If there are 25 samples in the **ready/** folder, five new folders will be created, each containing five samples (or rather, five pairs of files, since there is a R1 and R2 file per sample). These will be called **ready_sub1** through to **ready_sub5**. The structure will look like this:
+
+```plaintext
+
+└── stacksoutput/
+    ├── combined_plates/  
+    │   ├── ready/  (contains all samples)	
+    │   └── ready_sub1/	(contains the first five samples)
+    │   └── ready_sub2/ (contains the second five samples)
+.....
+```
+
+The script also creates subdivided population files in the **barcodes/** folder to match these, so that the denovo_map.pl function gets the correct population assignments for every group of five samples. This way, you can submit multiple jobs to the job queue, and run them all simultaneously.
+
+To submit the stacks_denovo script as a loop for simultaneous jobs, use:
+
+```plaintext
+for k in {1..17}; do qsub -N stacks_denovo_${k} -v K=${k},READY_FOLDER=ready_sub${k},POPS=sub${k}_pops.txt 4_stacks_denovo.job; done
+```
+
+Where you need to change the ``{1..17}`` part depending on the number of subfolders you have (here, I had 84 samples that were divided into 17 subfolders). 
 
 ### Barcode file
 
@@ -214,8 +236,6 @@ The **stacks_denovo.job** script runs the Stacks **denovo_map.pl** function with
 denovo_map.pl -m 3 -n 4 -M 3 -T 8 -o ./stacksoutput_denovo --popmap ./barcodes/bothplates_pops.txt --samples ./stacksoutput/combined_plates/ready --rm-pcr-duplicates --paired --min-samples-per-pop 0.75 --min-populations 2 -X "populations:--fstats"
 
 ```
-
-The script allows for you to specify a text file containing sample names that you wish to exclude from the analysis, if you want to. Put this file intot the **stacksoutput/combined_plates/ready** folder, and edit the name of the file in the job script (default is **file_list=samples_to_exclude.txt**).
 
 ### 🔵 Additional population assignment/s
 

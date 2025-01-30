@@ -185,7 +185,7 @@ qsub -v NUM_PLATES=1 3.1_stacks_demultiplex_postprocess.job
 
 Test run this to see how long the **4_stacks_denovo.job** script takes to process. If you're averaging 5 or 6 samples in 24 to 18 hours, then rather run ustacks, cstacks, sstacks, tsv2bam, gstacks and populations separately, rather than in the all-encompassing **denovo_map.pl** function. This approach is shown below this section.
 
-For the all-in-one **denovo_map.pl** approach:
+🚀 For the all-in-one **denovo_map.pl** approach:
 
 ```
 ✔️ # if you do not have a reference genome, run the stacks denovo script via the loop below. Otherwise skip to the refgenome script further down
@@ -196,7 +196,7 @@ qsub 4_stacks_denovo.job
 qsub 5_stacks_populations_denovo.job
 ```
 
-If the all-in-one **denovo_map.pl** approach takes too long, you will need to run each Stacks command separately. The **ustacks.job** script below has been adapted so that each sample file in the **ready/** folder is taken individually, and passed into the ustacks function as a separate job. I haven't seen a sample take longer than 3 hours, but change the walltime after experimenting with the data. It seems to work well with ``#PBS -l select=2:ncpus=24`` , and the ``-t`` threads parameter in ustacks set to ``-t 24``.
+🚀 If the all-in-one **denovo_map.pl** approach takes too long, you will need to run each Stacks command separately. The **ustacks.job** script below has been adapted so that each sample file in the **ready/** folder is taken individually, and passed into the ustacks function as a separate job. I haven't seen a sample take longer than 3 hours, but change the walltime after experimenting with the data. It seems to work well with ``#PBS -l select=2:ncpus=24`` , and the ``-t`` threads parameter in ustacks set to ``-t 24``.
 
 ```
 ✔️ # run ustacks separately, as this is what seems to require the most memory. You need to run each sample individually, as a separate job

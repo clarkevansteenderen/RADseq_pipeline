@@ -215,14 +215,12 @@ ls /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksou
 # 🥳 this submits the job to the scheduler:
 find $INFILES -type f -name "*.1.fq.gz" | sed -n "${start},${end}p" | while read file; do sample_name=$(basename "$file" .fq.gz); qsub -N ustacks_${sample_name} -v FILE="$file",SAMPLE_NAME="$sample_name" ustacks_loop.job; done
 
-✔️
+✔️ # run the next sequential steps in the Stacks pipeline:
 qsub cstacks.job
-✔️
 qsub sstacks.job
-✔️
 qsub tsv2bam.job
-✔️
 qsub gstacks.job
+
 ✔️ # edit accordingly (if you want additional populations assignments)
 qsub 5_stacks_populations_denovo.job
 
@@ -241,6 +239,9 @@ qsub 7_bowtie_aligning_refgenome.job
 
 ✔️ # sort the BAM files created after aligning in the previous step
 qsub 8_samtools_sort_stats_refgenome.job
+
+✔️ # run the Stacks ref_map.pl function
+qsub 9_stacks_refgenome.job
 ```
 
 Each script is in the form of a .job file that can be run on a Linux system. These have been tailored to be submitted on a PBS on the CHPC server. Before submitting a script, make sure that the #PBS headers are correct for your particular project by editing the **-o** and **-e** output paths, the project code (**-P**), and your email address (**-M**). Also make sure that you **cd** into the correct directory. For example:

@@ -196,7 +196,7 @@ qsub 4_stacks_denovo.job
 qsub 5_stacks_populations_denovo.job
 ```
 
-🚀 If the all-in-one **denovo_map.pl** approach takes too long, you will need to run each Stacks command separately. The **ustacks.job** script below has been adapted so that each sample file in the **ready/** folder is taken individually, and passed into the ustacks function as a separate job. I haven't seen a sample take longer than 3 hours, but change the walltime after experimenting with the data. It seems to work well with ``#PBS -l select=2:ncpus=24`` , and the ``-t`` threads parameter in ustacks set to ``-t 24``.
+🚀 If the all-in-one **denovo_map.pl** approach takes too long, you will need to run each Stacks command separately. The **ustacks.job** script below has been adapted so that each sample file in the **ready/** folder is taken individually, and passed into the ustacks function as a separate job. I haven't seen a sample take longer than 6 hours, but change the walltime after experimenting with the data. It seems to work well with ``#PBS -l select=2:ncpus=24`` , and the ``-t`` threads parameter in ustacks set to ``-t 24``.
 
 ```
 ✔️ # run ustacks separately, as this is what seems to require the most memory. You need to run each sample individually, as a separate job
@@ -204,8 +204,15 @@ qsub 5_stacks_populations_denovo.job
 # provide the full file path to where your samples are
 # check the max number of jobs allowed on the CHPC (seems to be 10). Work progressively through all the samples ➡️ change start to 11 and end to 21, until you get to the 84th sample (or however many you have)
 
+# set the walltime dynamically here
+WALLTIME="10:00:00"
+# specify the sample range
 start=1; end=10
+# specify the file path to the samples
 INFILES=/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput/combined_plates/ready
+# create a list of your samples for reference (you can use this to re-run particular samples that didn't finish due to too little walltime)
+ls /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput/combined_plates/ready/*.1.fq.gz | sed 's|.*/||; s/\.1\.fq\.gz$//' | nl -w2 -s'. '
+# 🥳 this submits the job to the scheduler:
 find $INFILES -type f -name "*.1.fq.gz" | sed -n "${start},${end}p" | while read file; do sample_name=$(basename "$file" .fq.gz); qsub -N ustacks_${sample_name} -v FILE="$file",SAMPLE_NAME="$sample_name" ustacks_loop.job; done
 
 ✔️

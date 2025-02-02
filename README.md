@@ -213,7 +213,7 @@ INFILES=/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/sta
 # create a list of your samples for reference (you can use this to re-run particular samples that didn't finish due to too little walltime)
 ls /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput/combined_plates/ready/*.1.fq.gz | sed 's|.*/||; s/\.1\.fq\.gz$//' | nl -w2 -s'. '
 # 🥳 this submits the job to the scheduler:
-find $INFILES -type f -name "*.1.fq.gz" | sed -n "${start},${end}p" | while read file; do sample_name=$(basename "$file" .fq.gz); qsub -N ustacks_${sample_name} -v FILE="$file",SAMPLE_NAME="$sample_name" ustacks_loop.job; done
+find $INFILES -type f -name "*.1.fq.gz" | sort | sed -n "${start},${end}p" | while read file; do sample_name=$(basename "$file" .1.fq.gz); qsub -l walltime=${WALLTIME} -N ustacks_${sample_name} -v FILE="$file",SAMPLE_NAME="$sample_name" ustacks_loop.job; done
 
 # run the next sequential steps in the Stacks pipeline:
 qsub cstacks.job

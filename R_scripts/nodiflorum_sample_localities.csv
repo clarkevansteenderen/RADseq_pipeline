@@ -1,0 +1,85 @@
+well position,sample_status,origin,sample_name,sample_id,Latitude,Longitude
+C12,Introduced,Canary Islands,CanaryIslands_1.1,CI1.1,28.5075,-13.8825
+A2,Introduced,Canary Islands,CanaryIslands_1.2,CI1.2,28.5075,-13.8825
+D1,Introduced,Canary Islands,CanaryIslands_1.4,CI1.4,28.5075,-13.8825
+E1,Introduced,Canary Islands,CanaryIslands_1.5,CI1.5,28.5075,-13.8825
+C11,Introduced,Canary Islands,CanaryIslands_2.1,CI2.1,28.681667,-13.956111
+A6,Introduced,Crete,Crete_3.3,CR3.3,35.225278,23.678333
+C8,Introduced,Crete,Crete_4.1,CR4.1,35.340833,25.054444
+A9,Introduced,Crete,Crete_4.3,CR4.3,35.340833,25.054444
+A11,Introduced,Crete,Crete_5.1,CR5.1,35.006944,25.728889
+A5,Introduced,Crete,Crete_5.2,CR5.2,35.006944,25.728889
+E11,Introduced,Cyprus,Cyprus_1.1,CY1.1,Not given,Not given
+D12,Introduced,Cyprus,Cyprus_1.2,CY1.2,Not given,Not given
+D3,Introduced,Cyprus,Cyprus_1.5,CY1.5,Not given,Not given
+F5,Introduced,Cyprus,Cyprus_1.6,CY1.6,Not given,Not given
+A8,Introduced,Egypt,Egypt_3.1,EG3.1,30.812778,29.075
+A10,Introduced,Egypt,Egypt_3.2,EG3.2,30.812778,29.075
+A1,Introduced,Egypt,Egypt_3.3,EG3.3,30.812778,29.075
+E3,Introduced,Egypt,Egypt_3.4,EG3.4,30.812778,29.075
+D4,Introduced,Egypt,Egypt_7.3,EG7.3,31.364167,27.146667
+D8,Introduced,Italy,Italy_1.2,I1.2,36.793333,12.051667
+A12,Introduced,Italy,Italy_1.4,IO1.4,36.793333,12.051667
+E9,Introduced,Italy,Italy_3.1,I3.1,40.776944,8.166944
+G12,Introduced,Italy,Italy_3.2,I3.2,40.776944,8.166944
+G8,Introduced,Italy,Italy_3.3,I3.3,40.776944,8.166944
+F2,Introduced,Italy,Italy_3.4,I3.4,40.776944,8.166944
+C6,Introduced,Malta,Malta_1.3,MT1.3,36.08075,14.23834
+C9,Introduced,Malta,Malta_2.2,MT2.2,35.8195,14.4542
+C10,Introduced,Malta,Malta_2.3,MT2.3,35.8195,14.4542
+C5,Introduced,Malta,Malta_2.4,MT2.4,35.8195,14.4542
+F6,Invasive,Mexico,Mexico_183,MX183,31.804166,-116.788611
+F4,Invasive,Mexico,Mexico_184,MX184,31.80416666,-116.788611
+H9,Invasive,Mexico,Mexico_185,MX185,31.809711,-116.80188
+H10,Invasive,Mexico,Mexico_186,MX186,31.80889812,-116.8013012
+G3,Invasive,Mexico,Mexico_193,MX193,30.480475,-116.109276
+G2,Invasive,Mexico,Mexico_194,MX194,30.4885411,-116.1237069
+F7,Invasive,Mexico,Mexico_195,MX195,30.48057988,-116.1086822
+H5,Invasive,Mexico,Mexico_206,MX206,27.1467868,-114.3792396
+G5,Invasive,Mexico,Mexico_207,MX207,27.1466579,-114.3795855
+H11,Invasive,Mexico,Mexico_208,MX208,27.1463863,-114.3809838
+F9,Invasive,Mexico,Mexico_209,MX209,27.1462407,-114.3814
+H8,Invasive,Mexico,Mexico_210,MX210,27.1461619,-114.381533
+F12,Introduced,Morocco,Morocco_1.1,MO1.1,29.590556,-10.036944
+D2,Introduced,Morocco,Morocco_1.2,MO1.2,29.590556,-10.036944
+F1,Introduced,Morocco,Morocco_1.3,MO1.3,29.590556,-10.036944
+F3,Introduced,Morocco,Morocco_1.4,MO1.4,29.590556,-10.036944
+C2,Introduced,Morocco,Morocco_4.2,MO4.2,28.9725,-10.088611
+E7,Introduced,Morocco,Morocco_4.3,MO4.3,28.9725,-10.088611
+C3,Introduced,Morocco,Morocco_4.4,MO4.4,28.9725,-10.088611
+D7,Introduced,Morocco,Morocco_5.4,MO5.4,28.823333,-10.287778
+A4,Indigenous,South Africa,SouthAfrica_1.1,SA1.1,-29.6732737,17.0749609
+C4,Indigenous,South Africa,SouthAfrica_1.2,SA1.2,-29.6732737,17.0749609
+A7,Indigenous,South Africa,SouthAfrica_1.3,SA1.3,-29.6732737,17.0749609
+F8,Indigenous,South Africa,SouthAfrica_2.1,SA2.1,-29.2481147,16.8683823
+E12,Indigenous,South Africa,SouthAfrica_2.2,SA2.2,-29.2481147,16.8683823
+G6,Indigenous,South Africa,SouthAfrica_2.3,SA2.3,-29.2481147,16.8683823
+E5,Indigenous,South Africa,SouthAfrica_2.4,SA2.4,-29.2481147,16.8683823
+G4,Indigenous,South Africa,SouthAfrica_3.1,SA3.1,-30.3159233,17.2757209
+E4,Indigenous,South Africa,SouthAfrica_3.2,SA3.2,-30.3159233,17.2757209
+H4,Indigenous,South Africa,SouthAfrica_3.3,SA3.3,-30.3159233,17.2757209
+E8,Indigenous,South Africa,SouthAfrica_3.4,SA3.4,-30.3159233,17.2757209
+F11,Indigenous,South Africa,SouthAfrica_4.1,SA4.1,-32.318785,18.316064
+H2,Indigenous,South Africa,SouthAfrica_4.2,SA4.2,-32.318785,18.316064
+G7,Indigenous,South Africa,SouthAfrica_4.3,SA4.3,-32.318785,18.316064
+G11,Indigenous,South Africa,SouthAfrica_4.4,SA4.4,-32.318785,18.316064
+A3,Introduced,Tunisia,Tunisia_2.1,TU2.1,34.756667,10.796944
+H6,Introduced,Tunisia,Tunisia_2.2,TU2.2,34.756667,10.796944
+H3,Introduced,Tunisia,Tunisia_2.3,TU2.3,34.756667,10.796944
+H12,Introduced,Tunisia,Tunisia_2.4,TU2.4,34.756667,10.796944
+G9,Introduced,Tunisia,Tunisia_6.1,TU6.1,34.635278,10.646944
+E6,Introduced,Tunisia,Tunisia_6.2,TU6.2,34.635278,10.646944
+F10,Introduced,Tunisia,Tunisia_6.3,TU6.3,34.635278,10.646944
+D10,Introduced,Tunisia,Tunisia_6.4,TU6.4,34.635278,10.646944
+E10,Invasive,United States,UnitedStates_103,US103,34.01528,-119.36111
+E2,Invasive,United States,UnitedStates_104,US104,34.01611,-119.36111
+H7,Invasive,United States,UnitedStates_105,US105,34.01583,-119.36222
+G1,Invasive,United States,UnitedStates_106,US106,34.01583,-119.3625
+C7,Invasive,United States,UnitedStates_113,US113,34.02268,-119.87663
+G10,Invasive,United States,UnitedStates_145,US145,Not given,Not given
+H1,Invasive,United States,UnitedStates_146,US146,Not given,Not given
+D9,Invasive,United States,UnitedStates_148,US148,Not given,Not given
+D6,Invasive,United States,UnitedStates_153,US153,Not given,Not given
+D11,Invasive,United States,UnitedStates_154,US154,Not given,Not given
+C1,Invasive,United States,UnitedStates_155,US155,Not given,Not given
+D5,Invasive,United States,UnitedStates_156,US156,Not given,Not given

@@ -371,18 +371,22 @@ qsub -I -P CBBI1682 -q serial -l select=1:ncpus=1:mpiprocs=1:nodetype=haswell_re
 module add chpc/BIOMODULES
 module add fastStructure
 
-cd /mnt/lustre/users/cvansteenderen/RADseq/IcePlant.RawData/Ice_L1
+cd /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/populations/broadgroups/faststructure
 
 # use a loop to iterate over K = 1 to K = 10
 # change file path accordinlgy
-for K in {1..10}; do 
-structure.py -K $K --input=stacksoutput_denovo/populations/broadgroups/structure/populations_nopopinfo --output=fastStructure/iceplant --format=str --full 
-done
+for K in {1..10}; do structure.py -K $K --input=populations --output=fastStructure --format=str --full; done
 
 # check which value of K is the best
-chooseK.py --input=fastStructure/iceplant
+chooseK.py --input=fastStructure
+
+# Nodiflorum outputs:
+#Model complexity that maximizes marginal likelihood = 3
+#Model components used to explain structure in data = 4
 
 # create Structure plots using the mean.Q files
 distruct.py -K 5 --input=test/testoutput_simple --output=test/testoutput_simple_distruct.svg
 
 ```
+
+Use the R script **faststructure_plots.R** to tweak the plots nicely.

@@ -358,6 +358,7 @@ Population assignments are made when denovo_map.pl is run, and so this **stacks_
 ### fastSTRUCTURE
 
 The input for fastStructure should follow this layout, where the column 1 are sample names, column 2 is group assignment, and the next four columns are blank. The data starts from column G onward. Also ensure that the text file itself is saved in Unix format (use Notepad++), otherwise there may be a formatting error.
+💡Change the file extension from **.structure** to **.str**
 
 ![](faststructure_input_file.png)
 

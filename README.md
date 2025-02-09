@@ -389,4 +389,19 @@ distruct.py -K 5 --input=test/testoutput_simple --output=test/testoutput_simple_
 
 ```
 
-Use the R script **faststructure_plots.R** to tweak the plots nicely.
+Use the R script **faststructure_plots.R** to tweak the plots nicely, as an alternative to the distruct.py output.
+
+In order to create a file for SplitsTree, use this R code, where you read in the **snps.vcf** output file from the populations run:
+
+```
+denovo_assembly = vcfR::read.vcfR("faststructure/populations.snps.vcf")
+denovo_assembly_genlight = vcfR::vcfR2genlight(denovo_assembly)
+denovo_assembly_genlight
+
+# export dist matrix to open in SplitsTree
+# https://devonderaad.github.io/zosterops.rad/splitstree.html
+denovo_assembly_genlight@pop<-as.factor(denovo_assembly_genlight@ind.names)
+sample.div <- StAMPP::stamppNeisD(denovo_assembly_genlight, pop = FALSE)
+#export for splitstree
+StAMPP::stamppPhylip(distance.mat=sample.div, file="faststructure/nodiflorum_splits.txt")
+```

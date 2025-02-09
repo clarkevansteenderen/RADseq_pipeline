@@ -357,6 +357,8 @@ Population assignments are made when denovo_map.pl is run, and so this **stacks_
 
 ### fastSTRUCTURE
 
+The output file from running Stacks' **populations** produces a .structure file. This has two row headers, which you should remove.
+
 The input for fastStructure should follow this layout, where the column 1 are sample names, column 2 is group assignment, and the next four columns are blank. The data starts from column G onward. Also ensure that the text file itself is saved in Unix format (use Notepad++), otherwise there may be a formatting error.
 💡Change the file extension from **.structure** to **.str**
 

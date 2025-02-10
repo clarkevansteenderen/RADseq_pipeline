@@ -20,7 +20,7 @@
 module add chpc/BIOMODULES
 module add stacks
 
-BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
 cd "$BASE_DIR"
 
 ############################################################################################################################

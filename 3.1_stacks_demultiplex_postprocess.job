@@ -2,7 +2,7 @@
 
 ############################################################################################
 # Submit this script as a job using:
-# qsub stacks_demultiplex_postprocess.job
+# qsub -v NUM_PLATES=1 stacks_demultiplex_postprocess.job
 ############################################################################################
 
 #PBS -l select=4:ncpus=24:mpiprocs=24
@@ -17,8 +17,13 @@
 
 ##############################################################
 
-# Specify number of plates
-NUM_PLATES=1
+# Check if NUM_PLATES is set
+if [ -z "$NUM_PLATES" ]; then
+    echo "ERROR: NUM_PLATES variable is not set. Please provide it with '-v NUM_PLATES=<n>' when submitting the job."
+    exit 1  # Exit with an error code
+fi
+
+NUM_PLATES=$NUM_PLATES
 
 BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
 cd "$BASE_DIR/stacksoutput"
@@ -87,53 +92,53 @@ join -t $'\t' "$BASE_DIR/barcodes/pops_all.txt" "$BASE_DIR/stacksoutput/combined
 # to the same place
 
 # Set the source folder (where your .fq.gz files are located)
-SOURCE_FOLDER="$BASE_DIR/stacksoutput/combined_plates/ready"
+# SOURCE_FOLDER="$BASE_DIR/stacksoutput/combined_plates/ready"
 
 # Set the destination base folder
-DEST_FOLDER="$BASE_DIR/stacksoutput/combined_plates"
+# DEST_FOLDER="$BASE_DIR/stacksoutput/combined_plates"
 
 # Create an array of file names in the source folder
-files=($(ls $SOURCE_FOLDER/*.fq.gz))
+# files=($(ls $SOURCE_FOLDER/*.fq.gz))
 
 # Initialize counter for subdirectory naming
-subfolder_count=1
+# subfolder_count=1
 
 # Loop through the files in groups of 5
-for ((i=0; i<${#files[@]}; i+=10)); do
-    # Create a subfolder for each group of 5 file pairs
-    subfolder="$DEST_FOLDER/ready_sub$subfolder_count"
-    mkdir -p "$subfolder"
+# for ((i=0; i<${#files[@]}; i+=10)); do
+#     # Create a subfolder for each group of 5 file pairs
+#     subfolder="$DEST_FOLDER/ready_sub$subfolder_count"
+#     mkdir -p "$subfolder"
 
-    # Copy corresponding file pairs (i.e., every 2 files per sample)
-    for ((j=i; j<i+10; j+=2)); do
-        if [ -e "${files[j]}" ]; then
-            cp "${files[j]}" "$subfolder"
-        fi
-        if [ -e "${files[j+1]}" ]; then
-            cp "${files[j+1]}" "$subfolder"
-        fi
-    done
+#     # Copy corresponding file pairs (i.e., every 2 files per sample)
+#     for ((j=i; j<i+10; j+=2)); do
+#         if [ -e "${files[j]}" ]; then
+#             cp "${files[j]}" "$subfolder"
+#         fi
+#         if [ -e "${files[j+1]}" ]; then
+#             cp "${files[j+1]}" "$subfolder"
+#         fi
+#     done
 
-    # Increment subfolder counter
-    ((subfolder_count++))
-done
+#     # Increment subfolder counter
+#     ((subfolder_count++))
+# done
 
 # now also create subdivided pop files
 
-#!/bin/bash
+# #!/bin/bash
 
 # Input file
-INPUT_FILE="$BASE_DIR/barcodes/bothplates_pops.txt"
+# INPUT_FILE="$BASE_DIR/barcodes/bothplates_pops.txt"
 
 # Define the output folder (optional: create it if it doesn't exist)
-OUTPUT_DIR="$BASE_DIR/barcodes/"
+# OUTPUT_DIR="$BASE_DIR/barcodes/"
 
 # Split the file into chunks of 5 lines and save as sub1, sub2, etc.
-split -l 5 "$INPUT_FILE" "$OUTPUT_DIR/sub"
+# split -l 5 "$INPUT_FILE" "$OUTPUT_DIR/sub"
 
 # Rename the split files to the desired format sub1_pops.txt, sub2_pops.txt, etc.
-counter=1
-for f in $OUTPUT_DIR/sub*; do
-    mv "$f" "$OUTPUT_DIR/sub${counter}_pops.txt"
-    ((counter++))
-done
+# counter=1
+# for f in $OUTPUT_DIR/sub*; do
+#     mv "$f" "$OUTPUT_DIR/sub${counter}_pops.txt"
+#     ((counter++))
+# done

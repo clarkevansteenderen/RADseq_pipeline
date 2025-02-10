@@ -9,8 +9,8 @@
 #PBS -P CBBI1682
 #PBS -q normal
 #PBS -l walltime=48:00:00
-#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/refgen_align_stdout.txt
-#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/refgen_align_stderr.txt
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/ref_genome/refgen_align_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/ref_genome/refgen_align_stderr.txt
 #PBS -N bowtie2_aligning
 #PBS -M vsteenderen@gmail.com
 #PBS -m abe
@@ -21,7 +21,7 @@ module add chpc/BIOMODULES
 module add bowtie2
 module add samtools
 
-BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
 cd "$BASE_DIR/stacksoutput/combined_plates/ready"
 
 ##############################################################

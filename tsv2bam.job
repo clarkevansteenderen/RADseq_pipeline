@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#PBS -l select=2:ncpus=24
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=1:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/tsv2bam_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/tsv2bam_sterr.txt
+#PBS -N tsv2bam
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+module add chpc/BIOMODULES 
+module add stacks 
+
+cd /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
+
+tsv2bam -P "$BASE_DIR/stacksoutput_denovo"  --threads 24 -M "$BASE_DIR/barcodes/bothplates_pops.txt" -R "$BASE_DIR/stacksoutput/combined_plates/ready/"

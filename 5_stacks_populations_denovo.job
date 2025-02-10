@@ -8,9 +8,9 @@
 #PBS -l select=2:ncpus=24:mpiprocs=24
 #PBS -P CBBI1682
 #PBS -q normal
-#PBS -l walltime=1:00:00
-#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_denovo/denovopops_stdout.txt
-#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/stacksoutput_denovo/denovopops_stderr.txt
+#PBS -l walltime=3:00:00
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/denovopops_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/denovopops_stderr.txt
 #PBS -N stacks_populations_denovo
 #PBS -M vsteenderen@gmail.com
 #PBS -m abe
@@ -20,15 +20,8 @@
 module add chpc/BIOMODULES
 module add stacks
 
-BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
 cd "$BASE_DIR"
-
-# get the output file populations.sumstats.tsv from the first denovo run, and extract 1000 random loci from it
-# Note: this sumstats file is written after the first time denovo_map.pl is run. You can use it to create the whitelist, but it isn't important thereafter,
-# since every time the populations program is run, it will create a sumstats file for that run 
-# 1000 loci is a manageable amount of data for STRUCTURE. Not sure whether STRUCTURE is that useful if it is limited by the amount of data it can handle?
-# the output file is whitelist.tsv 
-grep -v "^#" ./stacksoutput_denovo/populations.sumstats.tsv | cut -f 1 | sort | uniq | shuf -n 1000 | sort -n > ./stacksoutput_denovo/whitelist.tsv
 
 ##############################################################
 # Run populations 
@@ -38,24 +31,26 @@ grep -v "^#" ./stacksoutput_denovo/populations.sumstats.tsv | cut -f 1 | sort | 
 # RUN USING BROAD GROUPINGS FOR LOCALITY
 ##############################################
 
-mkdir -p ./stacksoutput_denovo/populations/broadgroups/structure
-mkdir -p ./stacksoutput_denovo/populations/broadgroups/otherformats
+mkdir -p "$BASE_DIR/stacksoutput_denovo/populations/broadgroups/structure"
+mkdir -p "$BASE_DIR/stacksoutput_denovo/populations/broadgroups/otherformats"
 
 # run populations to create output in the right format for use in STRUCTURE
-populations -P ./stacksoutput_denovo/ -O ./stacksoutput_denovo/populations/broadgroups/structure --popmap ./barcodes/bothplates_pops.txt -r 0.75 -f p_value -t 12 --hwe --fstats --structure --write-single-snp --ordered-export -W ./stacksoutput_denovo/whitelist.tsv
+populations -P "$BASE_DIR/stacksoutput_denovo" -O "$BASE_DIR/stacksoutput_denovo/populations/broadgroups/structure" --popmap "$BASE_DIR/barcodes/bothplates_pops.txt" -r 0.75 -f p_value -t 12 --hwe --fstats --structure --write-single-snp
 # run populations again to create other output formats, without the whitelist option (i.e. run on all the loci)
-populations -P ./stacksoutput_denovo/ -O ./stacksoutput_denovo/populations/broadgroups/otherformats --popmap ./barcodes/bothplates_pops.txt -r 0.75 -f p_value -t 12 --hwe --fstats --genepop --plink --phylip --vcf --vcf-all
+populations -P "$BASE_DIR/stacksoutput_denovo" -O "$BASE_DIR/stacksoutput_denovo/populations/broadgroups/otherformats" --popmap "$BASE_DIR/barcodes/bothplates_pops.txt" -r 0.75 -f p_value -t 12 --hwe --fstats --genepop --plink --phylip --vcf --vcf-all
 
 #############################################################
-# RUN USING GROUPS SUBDIVIDED INTO DIFFERENT SOUTH AFRICAN LOCATIONS
+# RUN USING GROUPS SUBDIVIDED INTO FINER RESOLUTION LOCATIONS
 #############################################################
 
 # Change the folder name here as appropriate, or comment out if not needed
 
-mkdir -p ./stacksoutput_denovo/populations/SAspecific/structure
-mkdir -p ./stacksoutput_denovo/populations/SAspecific/otherformats
+#mkdir -p "$BASE_DIR/stacksoutput_denovo/populations/finescale_groups/structure"
+#mkdir -p "$BASE_DIR/stacksoutput_denovo/populations/finescale_groups/otherformats"
 
 # run populations to create output in the right format for use in STRUCTURE
-populations -P ./stacksoutput_denovo/ -O ./stacksoutput_denovo/populations/SAspecific/structure --popmap ./barcodes/bothplates_pops_SA.txt -r 0.75 -f p_value -t 12 --hwe --fstats --structure --write-single-snp --ordered-export -W ./stacksoutput_denovo/whitelist.tsv
-# run populations again to create other output formats, without the whitelist option (i.e. run on all the loci)
-populations -P ./stacksoutput_denovo/ -O ./stacksoutput_denovo/populations/SAspecific/otherformats --popmap ./barcodes/bothplates_pops_SA.txt -r 0.75 -f p_value -t 12 --hwe --fstats --genepop --plink --phylip --vcf --vcf-all
+#populations -P "$BASE_DIR/stacksoutput_denovo" -O "$BASE_DIR/stacksoutput_denovo/populations/finescale_groups/structure" --popmap "$BASE_DIR/barcodes/bothplates_pops_finergrouping.txt" -r 0.75 -f p_value -t 12 --hwe --fstats --structure --write-single-snp --ordered-export
+
+# run populations again to create other output formats
+# change the barcode/pops file to the one with another grouping approach
+#populations -P "$BASE_DIR/stacksoutput_denovo" -O "$BASE_DIR/stacksoutput_denovo/populations/finescale_groups/otherformats" --popmap "$BASE_DIR/barcodes/bothplates_pops_finergrouping.txt" -r 0.75 -f p_value -t 12 --hwe --fstats --genepop --plink --phylip --vcf --vcf-all

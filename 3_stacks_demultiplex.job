@@ -2,7 +2,7 @@
 
 ############################################################################################
 # Submit this script as a job using:
-# qsub stacks_demultiplex.job
+# qsub -v NUM_PLATES=1 stacks_demultiplex.job
 ############################################################################################
 
 #PBS -l select=4:ncpus=24:mpiprocs=24
@@ -17,11 +17,16 @@
 
 ##############################################################
 
+# Check if NUM_PLATES is set
+if [ -z "$NUM_PLATES" ]; then
+    echo "ERROR: NUM_PLATES variable is not set. Please provide it with '-v NUM_PLATES=<n>' when submitting the job."
+    exit 1  # Exit with an error code
+fi
+
+NUM_PLATES=$NUM_PLATES
+
 module add chpc/BIOMODULES
 module add stacks
-
-# Specify number of plates
-NUM_PLATES=1
 
 BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
 cd "$BASE_DIR"

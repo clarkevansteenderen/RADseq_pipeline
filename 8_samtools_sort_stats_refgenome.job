@@ -2,15 +2,15 @@
 
 ############################################################################################
 # Submit this script as a job using:
-# qsub samtools_sort_stats.job
+# qsub 8_samtools_sort_stats.job
 ############################################################################################
 
 #PBS -l select=2:ncpus=24:mpiprocs=24
 #PBS -P CBBI1682
 #PBS -q normal
 #PBS -l walltime=10:00:00
-#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/alignment_sorted/samtools_stdout.txt
-#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/ref_genome/alignment_sorted/samtools_stderr.txt
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/ref_genome/alignment_sorted/samtools_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/ref_genome/alignment_sorted/samtools_stderr.txt
 #PBS -N samtools_sort_stats
 #PBS -M vsteenderen@gmail.com
 #PBS -m abe
@@ -20,7 +20,7 @@
 module add chpc/BIOMODULES
 module add samtools
 
-BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata"
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
 cd "$BASE_DIR"
 
 # Directory containing your unsorted BAM files

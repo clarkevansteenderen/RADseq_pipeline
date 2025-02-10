@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#PBS -l select=2:ncpus=24
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -o /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/ustacks_stdout.txt
+#PBS -e /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo/ustacks_sterr.txt
+#PBS -N ustacks
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+# change the file range to process. Here we're doing files 1 to 10
+
+# submit a separate job per sample using:
+
+#WALLTIME="10:00:00"
+#start=81; end=84
+#INFILES=/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput/combined_plates/ready
+# #create a list of your samples for reference
+# ls /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput/combined_plates/ready/*.1.fq.gz | sed 's|.*/||; s/\.1\.fq\.gz$//' | nl -w2 -s'. '
+# #run the actual script
+#find $INFILES -type f -name "*.1.fq.gz" | sort | sed -n "${start},${end}p" | while read file; do sample_name=$(basename "$file" .1.fq.gz); qsub -l walltime=${WALLTIME} -N ustacks_${sample_name} -v FILE="$file",SAMPLE_NAME="$sample_name" ustacks_loop.job; done
+
+cd /mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo
+
+OUTPUT_PATH="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo"
+
+module add chpc/BIOMODULES 
+module add stacks 
+
+ustacks --in-type gzfastq --file "$FILE" --out-path "$OUTPUT_PATH" -m 3 --name "$SAMPLE_NAME" -M 3 -t 24

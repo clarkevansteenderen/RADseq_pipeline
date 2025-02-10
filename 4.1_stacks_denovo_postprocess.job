@@ -1,0 +1,23 @@
+#!/bin/bash
+
+############################################################################################
+# Submit this script as a job using:
+# qsub 4.1_stacks_denovo_postprocess.job
+
+############################################################################################
+
+#PBS -l select=1:ncpus=24:mpiprocs=24:mem=60gb
+#PBS -P CBBI1682
+#PBS -q normal
+#PBS -l walltime=1:00:00
+#PBS -M vsteenderen@gmail.com
+#PBS -m abe
+
+##############################################################
+
+BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace/stacksoutput_denovo"
+
+# make a single folder (stacksoutput_merged) where we can put all the subsetted files back into 
+mkdir "$BASE_DIR/stacksoutput_merged"
+
+find $BASE_DIR -type f -name "*.gz" -exec cp {} "$BASE_DIR/stacksoutput_merged/" \;

@@ -2,7 +2,7 @@
 
 ############################################################################################
 # Submit this script as a job using:
-# qsub fastqc.job
+# qsub -v NUM_PLATES=1 2_fastqc.job
 ############################################################################################
 
 #PBS -l select=2:ncpus=24:mpiprocs=24:mem=124gb
@@ -22,13 +22,18 @@
 # use the unzip.job script to unzip and then rezip them before running fastqc 
 #############################################################################################
 
+# Check if NUM_PLATES is set
+if [ -z "$NUM_PLATES" ]; then
+    echo "ERROR: NUM_PLATES variable is not set. Please provide it with '-v NUM_PLATES=<n>' when submitting the job."
+    exit 1  # Exit with an error code
+fi
+
+NUM_PLATES=$NUM_PLATES
+
 module add chpc/BIOMODULES
 module add fastqc
 
 BASE_DIR="/mnt/lustre/users/cvansteenderen/RADseq_nodiflorum/rawdata/basespace"
-
-# Default to 1 plate if NUM_PLATES is not set here
-NUM_PLATES=1
 
 # Loop over the plates
 for i in $(seq 1 "$NUM_PLATES"); do

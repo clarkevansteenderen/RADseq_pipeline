@@ -380,8 +380,12 @@ for K in {1..10}; do structure.py -K $K --input=populations --output=fastStructu
 # check which value of K is the best
 chooseK.py --input=fastStructure
 
-# Nodiflorum outputs:
-#Model complexity that maximizes marginal likelihood = 3
+# Nodiflorum outputs for per country populations run:
+#Model complexity that maximizes marginal likelihood = 5
+#Model components used to explain structure in data = 5
+
+# Nodiflorum outputs for broad grouping populations run:
+#Model complexity that maximizes marginal likelihood = 4
 #Model components used to explain structure in data = 4
 
 # create Structure plots using the mean.Q files

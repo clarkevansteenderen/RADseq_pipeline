@@ -1,10 +1,12 @@
-# RADseq Pipeline
+# RADseq: *Mesembryanthemum nodiflorum*
 ## 🧬 **Linux and R scripts for a RADseq analysis pipeline**
 
 Contact Clarke van Steenderen at vsteenderen@gmail.com or clarke.vansteenderen@ru.ac.za for queries
 <br><br> 
 
 <img src="nodiflorum.png" width="500">
+
+*Image credit: Neal Kramer, UC Davis*
 
 # Table of Contents
 - [Downloading data: FTP method via Linux](#downloading-data-ftp-method-via-linux)

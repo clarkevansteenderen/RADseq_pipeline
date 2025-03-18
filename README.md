@@ -4,6 +4,8 @@
 Contact Clarke van Steenderen at vsteenderen@gmail.com or clarke.vansteenderen@ru.ac.za for queries
 <br><br> 
 
+<img src="nodiflorum.png" width="500">
+
 # Table of Contents
 - [Downloading data: FTP method via Linux](#downloading-data-ftp-method-via-linux)
 - [File organisation](#file-organisation)

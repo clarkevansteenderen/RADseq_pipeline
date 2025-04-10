@@ -1,0 +1,83 @@
+CI1.1	Canary Islands
+CI1.2	Canary Islands
+CI1.4	Canary Islands
+CI1.5	Canary Islands
+CI2.1	Canary Islands
+CR3.3	Crete
+CR4.1	Crete
+CR4.3	Crete
+CR5.1	Crete
+CR5.2	Crete
+CY1.1	Cyprus
+CY1.2	Cyprus
+CY1.5	Cyprus
+CY1.6	Cyprus
+EG3.1	Egypt
+EG3.2	Egypt
+EG3.3	Egypt
+EG3.4	Egypt
+EG7.3	Egypt
+I1.2	Italy
+I3.1	Italy
+I3.2	Italy
+I3.3	Italy
+I3.4	Italy
+IO1.4	Italy
+MO1.1	Morocco
+MO1.2	Morocco
+MO1.3	Morocco
+MO1.4	Morocco
+MO4.2	Morocco
+MO4.3	Morocco
+MO4.4	Morocco
+MO5.4	Morocco
+MT1.3	Malta
+MT2.2	Malta
+MT2.3	Malta
+MT2.4	Malta
+MX183	Mexico
+MX184	Mexico
+MX185	Mexico
+MX186	Mexico
+MX193	Mexico
+MX194	Mexico
+MX195	Mexico
+MX206	Mexico
+MX207	Mexico
+MX208	Mexico
+MX209	Mexico
+MX210	Mexico
+SA1.1	South Africa
+SA1.3	South Africa
+SA2.1	South Africa
+SA2.2	South Africa
+SA2.3	South Africa
+SA2.4	South Africa
+SA3.1	South Africa
+SA3.2	South Africa
+SA3.3	South Africa
+SA3.4	South Africa
+SA4.1	South Africa
+SA4.2	South Africa
+SA4.3	South Africa
+SA4.4	South Africa
+TU2.1	Tunisia
+TU2.2	Tunisia
+TU2.3	Tunisia
+TU2.4	Tunisia
+TU6.1	Tunisia
+TU6.2	Tunisia
+TU6.3	Tunisia
+TU6.4	Tunisia
+US103	United States
+US104	United States
+US105	United States
+US106	United States
+US113	United States
+US145	United States
+US146	United States
+US148	United States
+US153	United States
+US154	United States
+US155	United States
+US156	United States

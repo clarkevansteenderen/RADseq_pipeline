@@ -385,12 +385,12 @@ for K in {1..10}; do structure.py -K $K --input=populations --output=fastStructu
 chooseK.py --input=fastStructure
 
 # Nodiflorum outputs for per country populations run:
-#Model complexity that maximizes marginal likelihood = 5
-#Model components used to explain structure in data = 5
+#Model complexity that maximizes marginal likelihood = 3
+#Model components used to explain structure in data = 2
 
 # Nodiflorum outputs for broad grouping populations run:
-#Model complexity that maximizes marginal likelihood = 4
-#Model components used to explain structure in data = 4
+#Model complexity that maximizes marginal likelihood = 3
+#Model components used to explain structure in data = 2
 
 # create Structure plots using the mean.Q files
 distruct.py -K 5 --input=test/testoutput_simple --output=test/testoutput_simple_distruct.svg

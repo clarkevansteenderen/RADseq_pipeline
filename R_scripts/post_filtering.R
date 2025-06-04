@@ -115,6 +115,7 @@ denovo_assembly_genind
 
 # convert to genlight
 denovo_assembly_genlight = vcfR::vcfR2genlight(denovo_assembly)
+
 denovo_assembly_genlight@ind.names
 
 # Extract the grouping code (1–2 uppercase letters from the beginning)
@@ -128,11 +129,20 @@ broad_pops = ifelse(country_pops == "SA", "native",
 
 broad_pops
 
+# extract sites to group by site
+
+# Extract letter prefix and first digit
+site_pops = sub("^([A-Za-z]+\\d+).*", "\\1", denovo_assembly_genlight@ind.names)
+# now drop the numbers for MX and USA
+site_pops <- gsub("^MX\\d+", "MX", site_pops)
+site_pops <- gsub("^US\\d+", "US", site_pops)
+
 # check
-cbind(country_pops, broad_pops)
+cbind(denovo_assembly_genlight@ind.names, country_pops, broad_pops, site_pops)
 
 country_pops
 broad_pops
+site_pops
 denovo_assembly_genlight@ind.names
 
 country_pop_definitions = as.data.frame(cbind(denovo_assembly_genlight@ind.names, 
@@ -161,6 +171,7 @@ StAMPP::stamppPhylip(distance.mat=sample.div,
                      file="Rscripts/post_filtering_data/nodiflorum_splits.txt")
 ################################################################################
 
+# broad grouping
 broad_grouping.genind = denovo_assembly_genind
 broad_grouping.genind@pop = as.factor(broad_pops)
 
@@ -171,11 +182,52 @@ country_grouping.genlight@pop = as.factor(country_pops)
 country_grouping.genind = denovo_assembly_genind
 country_grouping.genind@pop = as.factor(country_pops)
 
+# site grouping
+site_grouping.genind = denovo_assembly_genind
+site_grouping.genind@pop = as.factor(site_pops)
+
+site_grouping.genlight = denovo_assembly_genlight
+site_grouping.genlight@pop = as.factor(site_pops)
+
+
 broad_grouping.genlight
 country_grouping.genlight
 
 broad_grouping.genind
 country_grouping.genind
+
+site_grouping.genind
+site_grouping.genlight
+
+#site_grouping.genpop = adegenet::genind2genpop(site_grouping.genind)
+graph4lg::genind_to_genepop(x=country_grouping.genind, 
+                            output = "post_filtering_data/country_grouping.txt")
+
+graph4lg::genind_to_genepop(x=broad_grouping.genind, 
+                            output = "post_filtering_data/broad_grouping.txt")
+
+graph4lg::genind_to_genepop(x=site_grouping.genind, 
+                            output = "post_filtering_data/site_grouping.txt")
+
+migrate.country <- diveRsity::divMigrate(infile = "post_filtering_data/country_grouping.txt", 
+                                      stat = "gst", 
+                                      filter_threshold = 0.3,
+                                      plot_network = TRUE,
+                                      plot_col = "darkgreen")
+
+migrate.broad <- diveRsity::divMigrate(infile = "post_filtering_data/broad_grouping.txt", 
+                                      stat = "gst", 
+                                      filter_threshold = 0.3,
+                                      plot_network = TRUE,
+                                      plot_col = "darkgreen")
+
+# this didn't work with Populations with only one representative! After deleting those,
+# the function worked
+migrate.site <- diveRsity::divMigrate(infile = "post_filtering_data/site_grouping.txt", 
+                                       stat = "gst",
+                                       filter_threshold = 0.3,
+                                       plot_network = TRUE,
+                                      plot_col = "darkgreen")
 
 #####################################################################################
 # create STRUCTURE files
@@ -197,6 +249,10 @@ myInset <- function(dapc){
        cex=1, pch=20, type="h", lwd=2)
 }
 
+############
+# BROAD
+############
+
 broad_myCol <- c("gold", "red", "forestgreen")
 
 broad.dapc = adegenet::dapc(broad_grouping.genlight, var.contrib = TRUE, 
@@ -211,11 +267,40 @@ add.scatter(myInset(broad.dapc), posi="bottomright",
             inset=c(-0.03,-0.08), ratio=.28,
             bg=transp("white"))
 
+# Extract scores and labels
+dapc_broad_df = as.data.frame(broad.dapc$ind.coord)
+dapc_broad_df$group = broad_pops
+head(dapc_broad_df)
+
+# Optional: mean points per group
+centroids.broad = aggregate(. ~ group, data = dapc_broad_df, FUN = mean)
+
+# Plot with repelled labels
+broad.dapc = ggplot(dapc_broad_df, aes(x = LD1, y = LD2, fill = group)) +
+  geom_point(alpha = 0.5, size = 4, shape = 21) +
+  #geom_point(data = centroids, aes(x = LD1, y = LD2), 
+  #           shape = 21, size = 4, alpha = 0.8) +
+  scale_fill_manual(values=broad_myCol) +
+  ggrepel::geom_text_repel(data = centroids.broad, aes(label = group), 
+                           size = 3, #fontface = "bold",
+                           max.overlaps = 100) +
+  theme_classic() +
+  theme(legend.position = "none") +
+  ggtitle("a)") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50");broad.dapc
 #ade4::scatter(broad.dapc, 1,1, col = broad_myCol, scree.da = FALSE, legend = TRUE, solid = 0.4)
+
+############
+# COUNTRY
+############
 
 as.factor(country_pops)
 country_myCol <- c("gold", "deeppink", "black", "purple", "royalblue", "darkorange",
                    "red", "forestgreen", "lightblue", "darkred")
+
+country_myCol <- c("gold", "gold", "gold", "gold", "gold", "gold",
+                   "red", "forestgreen", "gold", "red")
 
 country.dapc = adegenet::dapc(country_grouping.genlight, var.contrib = TRUE, 
                  scale = FALSE, n.pca = 40, n.da = nPop(country_grouping.genlight) - 1)
@@ -227,6 +312,114 @@ add.scatter(myInset(country.dapc), posi="bottomright",
             inset=c(-0.03,-0.12), ratio=.28,
             bg=transp("white"))
 
+# Extract scores and labels
+dapc_country_df = as.data.frame(country.dapc$ind.coord)
+dapc_country_df$group = country_pops
+head(dapc_country_df)
+
+# Optional: mean points per group
+centroids.country = aggregate(. ~ group, data = dapc_country_df, FUN = mean)
+
+# Plot with repelled labels
+country.dapc = ggplot(dapc_country_df, aes(x = LD1, y = LD2, fill = group)) +
+  geom_point(alpha = 0.5, size = 4, shape = 21) +
+  #geom_point(data = centroids, aes(x = LD1, y = LD2), 
+  #           shape = 21, size = 4, alpha = 0.8) +
+  scale_fill_manual(values=country_myCol) +
+  ggrepel::geom_text_repel(data = centroids.country, aes(label = group), 
+                           size = 3, #fontface = "bold",
+                           max.overlaps = 100) +
+  theme_classic() +
+  theme(legend.position = "none") +
+  ggtitle("b)") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50");country.dapc
+
+############
+# SITE
+############
+
+as.factor(site_pops)
+
+site.mycol <- c(
+  # CI - blues
+  "#1f77b4", # CI1 - medium blue
+  "#6baed6", # CI2 - lighter blue
+  
+  # CY - oranges
+  "#ff7f0e", # CY1 - medium orange
+  
+  # EG - browns
+  "brown", # EG3 - medium green
+  "chocolate", # EG7 - lighter green
+  
+  # I - cyans
+  "#17becf", # I1 - medium cyan
+  "#9edae5", # I3 - light cyan
+  
+  # MO - purples
+  "#9467bd", # MO1 - medium purple
+  "#bfa6d3", # MO4 - lavender
+  "#6a3d9a", # MO5 - deep purple
+  
+  # MT - pinks
+  "#e377c2", # MT1 - magenta
+  "#f7b6d2", # MT2 - light pink
+  
+  # MX - reds
+  "#8b0000", # MX - dark red
+  
+  # SA - greens
+  "darkgreen", # SA1 - gray
+  "#bcbd22", # SA2 - olive
+  "#dbdb8d", # SA3 - light olive
+  "forestgreen", # SA4 - navy-ish
+  
+  # TU - golds
+  "#8c6d31", # TU2 - dark gold
+  "#e7ba52", # TU6 - light gold
+  
+  # US - black
+  "#000000"  # US
+)
+
+site.dapc = adegenet::dapc(site_grouping.genlight, var.contrib = TRUE, 
+                scale = FALSE, n.pca = 40, n.da = nPop(site_grouping.genlight) - 1)
+ade4::scatter(site.dapc, posi.pca = "topleft", clabel = 1, leg = F,
+              cstar = 0, cell = 0, solid = 1, pch = 20, cex = 3, scree.da=FALSE,
+              col = site.mycol)
+
+add.scatter(myInset(site.dapc), posi="bottomright",
+            inset=c(-0.03,-0.12), ratio=.28,
+            bg=transp("white"))
+
+# Extract scores and labels
+dapc_sites_df = as.data.frame(site.dapc$ind.coord)
+dapc_sites_df$group = site_pops
+dapc_sites_df$group = as.factor(dapc_sites_df$group)
+head(dapc_sites_df)
+levels(dapc_sites_df$group)
+
+# Optional: mean points per group
+centroids.sites = aggregate(. ~ group, data = dapc_sites_df, FUN = mean)
+
+# Plot with repelled labels
+site.dapc = ggplot(dapc_sites_df, aes(x = LD1, y = LD2, fill = group)) +
+  geom_point(alpha = 0.5, size = 4, shape = 21) +
+ # geom_point(data = centroids, aes(x = LD1, y = LD2), 
+ #            shape = 21, size = 4, alpha = 0.8) +
+  scale_fill_manual(values=site.mycol) +
+  ggrepel::geom_text_repel(data = centroids.sites, aes(label = group), 
+                           size = 3, #fontface = "bold",
+                           max.overlaps = 100) +
+  theme_classic() +
+  theme(legend.position = "none") +
+  ggtitle("c)") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50");site.dapc
+
+gridExtra::grid.arrange(broad.dapc, country.dapc, site.dapc,
+                        nrow = 2, ncol = 2)
 
 ##################################
 # population statistics
@@ -242,20 +435,38 @@ broad_poppr_result <- broad_poppr_result[-nrow(broad_poppr_result), ] # remove l
 country_poppr_result = poppr::poppr(country_grouping.genind)
 country_poppr_result <- country_poppr_result[-nrow(country_poppr_result), ]
 
+site_poppr_result = poppr::poppr(site_grouping.genind)
+site_poppr_result <- site_poppr_result[-nrow(site_poppr_result), ]
+
 #############
 # add more stats to the above DFs
 
 broad.stats = hierfstat::basic.stats(data = broad_grouping.genind)
 country.stats = hierfstat::basic.stats(data = country_grouping.genind)
+site.stats = hierfstat::basic.stats(data = site_grouping.genind)
+
+broad.AR = hierfstat::allelic.richness(data = broad_grouping.genind)
+country.AR = hierfstat::allelic.richness(data = country_grouping.genind)
+site.AR = hierfstat::allelic.richness(data = site_grouping.genind)
 
 # add to existing DFs
 broad_poppr_result$Fis = colMeans(broad.stats$Fis, na.rm = TRUE)
 broad_poppr_result$Ho = colMeans(broad.stats$Ho, na.rm = TRUE)
 broad_poppr_result$Hs =colMeans(broad.stats$Hs, na.rm = TRUE) 
 
+broad_poppr_result$allelerichness = colMeans(broad.AR$Ar, na.rm = TRUE)
+
 country_poppr_result$Fis = colMeans(country.stats$Fis, na.rm = TRUE)
 country_poppr_result$Ho = colMeans(country.stats$Ho, na.rm = TRUE)
 country_poppr_result$Hs = colMeans(country.stats$Hs, na.rm = TRUE)
+
+country_poppr_result$allelerichness = colMeans(country.AR$Ar, na.rm = TRUE)
+
+site_poppr_result$Fis = colMeans(site.stats$Fis, na.rm = TRUE)
+site_poppr_result$Ho = colMeans(site.stats$Ho, na.rm = TRUE)
+site_poppr_result$Hs = colMeans(site.stats$Hs, na.rm = TRUE)
+
+site_poppr_result$allelerichness = colMeans(site.AR$Ar, na.rm = TRUE)
 
 # find private alleles and add to existing DFs
 
@@ -271,23 +482,36 @@ country_private_alleles = poppr::private_alleles(country_grouping.genind, report
 country_total_private_perpop = aggregate(count ~ population, 
                                          data = country_private_alleles, sum)
 
+site_private_alleles = poppr::private_alleles(site_grouping.genind, report = "data.frame",
+                                                 level = "population", count.alleles = FALSE) 
+
+site_total_private_perpop = aggregate(count ~ population, 
+                                         data = site_private_alleles, sum)
+
 broad_poppr_result$private_alleles = broad_total_private_perpop$count
 country_poppr_result$private_alleles = country_total_private_perpop$count
+site_poppr_result$private_alleles = site_total_private_perpop$count
 
 write.csv(broad_poppr_result, 
-          "Rscripts/post_filtering_data/broad_poppr_results.csv", row.names = FALSE)
+          "post_filtering_data/broad_poppr_results.csv", row.names = FALSE)
 write.csv(country_poppr_result, 
-          "Rscripts/post_filtering_data/country_poppr_results.csv", row.names = FALSE)
+          "post_filtering_data/country_poppr_results.csv", row.names = FALSE)
+write.csv(site_poppr_result, 
+          "post_filtering_data/site_poppr_results.csv", row.names = FALSE)
 
 
 # FST values
 broad.FST = hierfstat::genet.dist(broad_grouping.genind, method = "WC84")
 broad.FST = as.data.frame(as.matrix(broad.FST))
-write.csv(broad.FST, "Rscripts/post_filtering_data/broadFST.csv", row.names = T)
+write.csv(broad.FST, "post_filtering_data/broadFST.csv", row.names = T)
 
 country.FST = hierfstat::genet.dist(country_grouping.genind, method = "WC84")
 country.FST = as.data.frame(as.matrix(country.FST))
-write.csv(country.FST, "Rscripts/post_filtering_data/countryFST.csv", row.names = T)
+write.csv(country.FST, "post_filtering_data/countryFST.csv", row.names = T)
+
+site.FST = hierfstat::genet.dist(site_grouping.genind, method = "WC84")
+site.FST = as.data.frame(as.matrix(site.FST))
+write.csv(site.FST, "post_filtering_data/siteFST.csv", row.names = T)
 
 #################################
 # plotting
@@ -295,15 +519,24 @@ write.csv(country.FST, "Rscripts/post_filtering_data/countryFST.csv", row.names 
 
 broad_poppr_result = read.csv("post_filtering_data/broad_poppr_results.csv") %>%
   dplyr::select(-c(File, Hexp, SE, E.5, eMLG)) %>%
-  dplyr::rename("private alleles" = "private_alleles") %>%
+  dplyr::rename("PA" = "private_alleles",
+                "AR" = "allelerichness") %>%
   tidyr::pivot_longer(cols = -Pop, names_to = "statistic", values_to = "value") 
 head(broad_poppr_result)
 
 country_poppr_result = read.csv("post_filtering_data/country_poppr_results.csv") %>%
   dplyr::select(-c(File, Hexp, SE, E.5, eMLG)) %>%
-  dplyr::rename("private alleles" = "private_alleles") %>%
+  dplyr::rename("PA" = "private_alleles",
+                "AR" = "allelerichness") %>%
   tidyr::pivot_longer(cols = -Pop, names_to = "statistic", values_to = "value")
 head(country_poppr_result)
+
+site_poppr_result = read.csv("post_filtering_data/site_poppr_results.csv") %>%
+  dplyr::select(-c(File, Hexp, SE, E.5, eMLG)) %>%
+  dplyr::rename("PA" = "private_alleles",
+                "AR" = "allelerichness") %>%
+  tidyr::pivot_longer(cols = -Pop, names_to = "statistic", values_to = "value")
+head(site_poppr_result)
 
 
 popstats.broad.plot = ggplot(broad_poppr_result, aes(x = Pop, y = value, fill = Pop)) +
@@ -324,15 +557,28 @@ country_poppr_result$fill_color <- ifelse(grepl("\\bSA\\b", country_poppr_result
 popstats.country.plot = ggplot(country_poppr_result, aes(x = Pop, y = value, 
                           fill = fill_color)) +
   geom_bar(stat = "identity", show.legend = FALSE, alpha = 0.6, colour ="black") +
-  facet_wrap(~statistic, scales = "free_y") +
+  facet_wrap(~statistic, scales = "free_y", nrow = 4, ncol = 3) +
   scale_fill_identity() +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   labs(x = "Population", y = "Value", title = "") ;popstats.country.plot
 
-ggsave("post_filtering_data/popstats.country.png", popstats.country.plot, width = 8, dpi=400,
-       height = 5, units = "in")
+ggsave("post_filtering_data/popstats.country.png", popstats.country.plot, width = 6.5, dpi=400,
+       height = 6.5, units = "in")
 
 
-broad_grouping.genpop = adegenet::genind2genpop(broad_grouping.genind)
+site_poppr_result$fill_color = ifelse(grepl("^SA", site_poppr_result$Pop), "forestgreen",
+                               ifelse(grepl("^(US|MX)", site_poppr_result$Pop), "darkred", "goldenrod"))
+
+popstats.site.plot = ggplot(site_poppr_result, aes(x = Pop, y = value, 
+                                                   fill = fill_color)) +
+  geom_bar(stat = "identity", show.legend = FALSE, alpha = 0.6, , colour = "black") +
+  facet_wrap(~statistic, scales = "free_y", nrow = 4, ncol = 3) +
+  scale_fill_identity() +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = "Population", y = "Value", title = "") ;popstats.site.plot
+
+ggsave("post_filtering_data/popstats.site.png", popstats.site.plot, width = 7.5, dpi=400,
+       height = 6.5, units = "in")
 

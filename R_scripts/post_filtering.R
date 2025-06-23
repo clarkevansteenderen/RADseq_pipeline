@@ -252,11 +252,41 @@ myInset <- function(dapc){
 ############
 # BROAD
 ############
-
 broad_myCol <- c("gold", "red", "forestgreen")
 
+# standard PCA
+broad.pca = adegenet::glPca(broad_grouping.genlight, nf = 10)
+summary(broad.pca)
+# First extract PCA scores
+scores <- as.data.frame(broad.pca$scores)  # PCA coordinates (individuals × axes)
+scores$group = pop(broad_grouping.genlight)
+
+pca.ggplot = ggplot(scores, aes(x = PC1, y = PC2, fill = group)) +
+  geom_point(alpha = 0.5, size = 4, shape = 21) +
+  labs(
+    title = "PCA of RADseq data",
+    x = paste0("PC1 (", round(broad.pca$eig[1] / sum(broad.pca$eig) * 100, 1), "%)"),
+    y = paste0("PC2 (", round(broad.pca$eig[2] / sum(broad.pca$eig) * 100, 1), "%)")
+  ) +
+  scale_fill_manual(values = c(
+    "introduced" = "gold",
+    "invaded" = "red",
+    "native" = "forestgreen"
+  )) + 
+  ggrepel::geom_text_repel(aes(label = rownames(scores)), 
+                           vjust = -1, size = 3, colour = "black") +
+  theme_classic() +
+  theme(legend.position = "none") +
+  ggtitle("e)") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50")
+
+ggsave("post_filtering_data/pca.svg", pca.ggplot, width = 4, dpi=400,
+       height = 4, units = "in")
+
+
 broad.dapc = adegenet::dapc(broad_grouping.genlight, var.contrib = TRUE, 
-               scale = FALSE, n.pca = NULL, n.da = nPop(broad_grouping.genlight) - 1)
+               scale = FALSE, n.pca = 40, n.da = nPop(broad_grouping.genlight) - 1)
 
 ade4::scatter(broad.dapc, clabel = 0, legend = TRUE, cell=0,
               cstar = 0, cex = 4, pch = 20, solid = 0.4, scree.da=FALSE,
@@ -294,6 +324,14 @@ broad.dapc = ggplot(dapc_broad_df, aes(x = LD1, y = LD2, fill = group)) +
 ############
 # COUNTRY
 ############
+
+# standard PCA
+country.pca = adegenet::glPca(country_grouping.genlight, nf = 4)
+summary(country.pca)
+ade4::scatter(country.pca, posi="none", clabel = 1, legend = TRUE, cell=0,
+              cstar = 0, cex = 4, pch = 20, solid = 0.4, scree.da=FALSE,
+               bg="white",
+              cleg = 0.75, xax = 1, yax = 2)
 
 as.factor(country_pops)
 country_myCol <- c("gold", "deeppink", "black", "purple", "royalblue", "darkorange",
@@ -338,6 +376,15 @@ country.dapc = ggplot(dapc_country_df, aes(x = LD1, y = LD2, fill = group)) +
 ############
 # SITE
 ############
+
+# standard PCA
+site.pca = adegenet::glPca(site_grouping.genlight, nf = 4)
+summary(site.pca)
+ade4::scatter(site.pca, posi="none", clabel = 1, legend = TRUE, cell=0,
+              cstar = 0, cex = 4, pch = 20, solid = 0.4, scree.da=FALSE,
+              bg="white",
+              cleg = 0.75, xax = 1, yax = 2)
+
 
 as.factor(site_pops)
 
